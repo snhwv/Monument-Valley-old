@@ -1,0 +1,26 @@
+{
+  "name": "monument-valley",
+  "version": "1.0.0",
+  "description": "a web version of Monument-Valley",
+  "main": "index.js",
+  "repository": "https://github.com/snhwv/Monument-Valley.git",
+  "author": "snhwv <948643284@qq.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "./node_modules/.bin/webpack --config ./config/webpack.dev.config.js --mode development",
+    "start": "webpack-dev-server --config ./config/webpack.dev.config.js"
+  },
+  "dependencies": {
+    "@types/three": "^0.103.2",
+    "clean-webpack-plugin": "^3.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "three": "^0.109.0",
+    "ts-loader": "^6.2.0",
+    "typescript": "^3.6.3",
+    "webpack": "^4.41.0",
+    "webpack-dev-server": "^3.8.2"
+  },
+  "devDependencies": {
+    "webpack-cli": "^3.3.9"
+  }
+}
