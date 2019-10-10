@@ -28,6 +28,12 @@ module.exports = {
       template: path.resolve(__dirname, "../index.html")
     })
   ],
+  resolve: {
+    extensions: [ '.ts', '.js' ],
+    alias: {
+      '@': path.resolve(__dirname, '../src')
+    }
+  },
   devServer: {
     contentBase: path.join(__dirname, "../dist"),
     compress: true,

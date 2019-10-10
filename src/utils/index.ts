@@ -1,4 +1,4 @@
-import { Vector2 } from 'three';
+import { Vector2, Vector3, Quaternion, Object3D, Matrix4 } from "three";
 
 export function squarePositionGenerator(
   center: Vector2 = new Vector2(),
@@ -34,4 +34,20 @@ export function squarePositionGenerator(
     return item.sub(squareCenter.sub(center));
   });
   return positions;
+}
+
+export function compose(
+  obj: Object3D,
+  translation: Vector3 = new Vector3(),
+  rotation: Quaternion,
+  scale: Vector3 = new Vector3(1, 1, 1)
+) {
+  var rotWorldMatrix = new Matrix4(); //创建一个4*4矩阵
+  rotWorldMatrix.compose(
+    translation,
+    rotation,
+    scale
+  );
+  rotWorldMatrix.multiply(obj.matrix); // pre-multiply
+  obj.applyMatrix( rotWorldMatrix );
 }

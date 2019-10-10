@@ -17,7 +17,7 @@ renderer.setSize(width, height);
 //加入到body
 document.body.appendChild(renderer.domElement);
 
-camera.position.set(1000, 1000, 1000);
+camera.position.set(100, 100, 100);
 const controls = new OrbitControls(camera, renderer.domElement);
 
 //渲染循环
