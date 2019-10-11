@@ -10,15 +10,17 @@ import {
   MeshPhongMaterial
 } from "three";
 import { compose } from "@/utils";
-import { axis } from "@/constents";
+import { axis, unitLength } from "@/constents";
 
 export default class Stairway {
   element: Group = new Group();
 
   size = 1;
   haSpedestal = false;
+  stairNumPerCube = 8;
+  stairWidth = unitLength / this.stairNumPerCube;
 
-  constructor(size: number, haSpedestal: boolean) {
+  constructor(size: number, haSpedestal: boolean = false) {
     this.size = size;
     this.haSpedestal = haSpedestal;
     this.init();
@@ -31,28 +33,39 @@ export default class Stairway {
     this.generateShape();
   }
 
+  line(x: number) {
+    return -x + unitLength * this.size + this.stairWidth;
+  }
+
   // 中间的阀塞
   generateShape() {
-    var heartShape = new Shape();
+    var shape = new Shape();
+    if (this.haSpedestal) {
+      shape.moveTo(0, unitLength * this.size - this.stairWidth);
+    }
+    for (
+      let i = this.stairWidth;
+      i < unitLength * this.size + this.stairWidth;
+      i += this.stairWidth
+    ) {
+      // i => x
+      shape.lineTo(i - this.stairWidth, this.line(i));
+      shape.lineTo(i, this.line(i));
+    }
+    shape.lineTo(unitLength * this.size, 0);
+    if (this.haSpedestal) {
+      shape.lineTo(unitLength * this.size - this.stairWidth, 0);
+    }
 
-    heartShape.moveTo(0, 0);
-    heartShape.lineTo(10,0);
-    heartShape.lineTo(10,10);
-    heartShape.lineTo(20,10);
-    heartShape.lineTo(20,20);
-    console.log(heartShape)
     var extrudeSettings = {
-      amount: 8,
-      bevelEnabled: true,
-      bevelSegments: 2,
-      steps: 2,
-      bevelSize: 1,
-      bevelThickness: 1
+      depth: unitLength,
+      bevelEnabled: false
     };
 
-    var geometry = new ExtrudeGeometry(heartShape, extrudeSettings);
+    var geometry = new ExtrudeGeometry(shape, extrudeSettings);
 
     var mesh = new Mesh(geometry, new MeshPhongMaterial());
+    mesh.translateZ(-unitLength / 2);
     this.element.add(mesh);
   }
 }

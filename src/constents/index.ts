@@ -4,3 +4,5 @@ export const axis = {
   y: new Vector3(0, 1, 0),
   z: new Vector3(0, 0, 1)
 };
+
+export const unitLength = 20;
