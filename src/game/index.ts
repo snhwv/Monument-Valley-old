@@ -1,20 +1,12 @@
-import {
-  BoxGeometry,
-  MeshBasicMaterial,
-  MeshLambertMaterial,
-  Mesh,
-  Vector2,
-  Quaternion,
-  Vector3
-} from "three";
-import { scene } from "./base";
-import { squarePositionGenerator, compose } from "../utils";
-import Valve from "@/components/valve";
-import Stairway from "@/components/stairway";
-import { axis, unitLength } from "@/constents";
-import CirclePath from "@/components/circlePath";
-import("./helpers");
-import("./light");
+import { BoxGeometry, MeshBasicMaterial, MeshLambertMaterial, Mesh, Vector2, Quaternion, Vector3 } from 'three';
+import { scene } from './base';
+import { squarePositionGenerator, compose } from '../utils';
+import Valve from '@/components/valve';
+import Stairway from '@/components/stairway';
+import { axis, unitLength } from '@/constents';
+import { QuarterCirclePathOuter, CirclePathInner } from '@/components/circlePath';
+import('./helpers');
+import('./light');
 let geometry = new BoxGeometry(20, 20, 20);
 let material = new MeshLambertMaterial({ color: 0x00ff00 });
 //加入到场景
@@ -38,5 +30,7 @@ for (let i = 0; i < positions.length; i++) {
 // );
 // scene.add(stairway);
 console.log(scene);
-const circlePath = new CirclePath(4, false, 0, Math.PI, false).element;
-scene.add(circlePath)
+const circlePath = new QuarterCirclePathOuter(4, 10).element;
+scene.add(circlePath);
+// const circlePath = new CirclePathInner(4, 0, Math.PI, false).element;
+// scene.add(circlePath);
