@@ -9,7 +9,6 @@ import {
     ExtrudeGeometry,
     MeshPhongMaterial
   } from "three";
-  import { compose } from "@/utils";
   import { axis, unitLength } from "@/constents";
   
   export class CirclePathInner {

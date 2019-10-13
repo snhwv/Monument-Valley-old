@@ -9,7 +9,6 @@ import {
   ExtrudeGeometry,
   MeshPhongMaterial
 } from "three";
-import { compose } from "@/utils";
 import { axis, unitLength } from "@/constents";
 
 export default class Stairway {
@@ -65,7 +64,14 @@ export default class Stairway {
     var geometry = new ExtrudeGeometry(shape, extrudeSettings);
 
     var mesh = new Mesh(geometry, new MeshPhongMaterial());
-    mesh.translateZ(-unitLength / 2);
+    mesh.position.sub(
+      new Vector3(
+        (unitLength * this.size) / 2,
+        (unitLength * this.size) / 2,
+        unitLength / 2
+      )
+    );
     this.element.add(mesh);
   }
+
 }
