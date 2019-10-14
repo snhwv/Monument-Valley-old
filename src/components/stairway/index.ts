@@ -18,7 +18,7 @@ export default class Stairway {
   haSpedestal = false;
   stairNumPerCube = 8;
   stairWidth = unitLength / this.stairNumPerCube;
-
+  depth = unitLength;
   constructor(size: number, haSpedestal: boolean = false) {
     this.size = size;
     this.haSpedestal = haSpedestal;
@@ -36,7 +36,6 @@ export default class Stairway {
     return -x + unitLength * this.size + this.stairWidth;
   }
 
-  // 中间的阀塞
   generateShape() {
     var shape = new Shape();
     if (this.haSpedestal) {
@@ -57,7 +56,7 @@ export default class Stairway {
     }
 
     var extrudeSettings = {
-      depth: unitLength,
+      depth: this.depth,
       bevelEnabled: false
     };
 

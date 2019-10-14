@@ -1,5 +1,5 @@
-import { getQuaternionFromAxisAndAngle } from '@/utils';
-import { composeObject } from '@/utils';
+import { getQuaternionFromAxisAndAngle } from "@/utils";
+import { composeObject } from "@/utils";
 import {
   CylinderBufferGeometry,
   MeshLambertMaterial,
@@ -11,10 +11,10 @@ import {
   ExtrudeGeometry,
   MeshPhongMaterial,
   BufferGeometry,
-  Geometry,
-} from 'three';
-import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils';
-import { axis, unitLength } from '@/constents';
+  Geometry
+} from "three";
+import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils";
+import { axis, unitLength } from "@/constents";
 
 export default class Door {
   element: Group = new Group();
@@ -24,7 +24,13 @@ export default class Door {
   deep: number;
   doorHeight = 2 * unitLength;
   geo: any;
-  constructor(doorWidth: number = unitLength - 2 * 2, doorHeight: number = 2 * unitLength,deep:number = 0, edge: number = 2) {
+  height!:number;
+  constructor({
+    doorWidth = unitLength - 2 * 2,
+    doorHeight = 2 * unitLength,
+    deep = 0,
+    edge = 2
+  }) {
     this.doorWidth = doorWidth;
     this.doorHeight = doorHeight;
     this.edge = edge;
@@ -42,22 +48,27 @@ export default class Door {
 
   generateDoor() {
     var shape = new Shape();
+    this.height = this.doorHeight + this.doorWidth / 2;
     shape.lineTo(this.doorWidth, 0);
     shape.lineTo(this.doorWidth, this.doorHeight);
-    shape.lineTo(this.doorWidth / 2, this.doorHeight + this.doorWidth / 2);
+    shape.lineTo(this.doorWidth / 2, this.height);
     shape.lineTo(0, this.doorHeight);
     shape.lineTo(0, 0);
     const depth = this.deep;
     var extrudeSettings = {
       depth,
-      bevelEnabled: false,
+      bevelEnabled: false
     };
 
     var geometry = new ExtrudeGeometry(shape, extrudeSettings);
 
     composeObject(
       geometry,
-      new Vector3(-this.doorWidth / 2, -(this.doorWidth / 2 + this.doorHeight) / 2, -depth / 2),
+      new Vector3(
+        -this.doorWidth / 2,
+        -(this.doorWidth / 2 + this.doorHeight) / 2,
+        -depth / 2
+      ),
       // new Vector3(),
       getQuaternionFromAxisAndAngle(axis.x, 0)
     );

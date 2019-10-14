@@ -10,18 +10,22 @@ import THREE, {
   Matrix4
 } from "three";
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils";
-import { composeObjectWidthMultiply, composeObject, getQuaternionFromAxisAndAngle } from "@/utils";
+import {
+  composeObjectWidthMultiply,
+  composeObject,
+  getQuaternionFromAxisAndAngle
+} from "@/utils";
 import { axis } from "@/constents";
 
 export default class Valve {
   element: Group = new Group();
 
-  plugWidth = 20;
-  plugR = 8;
+  plugWidth = 12;
+  plugR = 5.2;
 
   rodWidth = 30;
   rodR = 1.8;
-  rodEndWidth = 10;
+  rodEndWidth = 7;
   rodEndR = 3;
 
   constructor() {
@@ -90,7 +94,9 @@ export default class Valve {
     var endMaterial = new MeshLambertMaterial({ color: 0xffff00 });
     var endCylinder = new Mesh(endGeometry, endMaterial);
 
-    composeObjectWidthMultiply(
+    // endCylinder.translateX(this.rodWidth - this.rodEndWidth / 2);
+    // endCylinder.rotateOnAxis(axis.z, Math.PI / 2);
+    composeObject(
       endCylinder,
       new Vector3(this.rodWidth - this.rodEndWidth / 2, 0, 0),
       getQuaternionFromAxisAndAngle(axis.z, Math.PI / 2)
@@ -98,43 +104,43 @@ export default class Valve {
 
     for (let i = 0; i < 4; i++) {
       const mesh = endCylinder.clone();
-
-      var quaternion = new Quaternion();
-      quaternion.setFromAxisAngle(axis.y, (Math.PI / 2) * i);
-      composeObject(mesh, new Vector3(), quaternion);
-      mesh.geometry = mesh.geometry.clone();
-      mesh.geometry.applyMatrix(mesh.matrix);
+      composeObject(
+        endCylinder,
+        new Vector3(0, 0, 0),
+        getQuaternionFromAxisAndAngle(axis.y, Math.PI / 2 * i)
+      );
       rod.add(mesh);
     }
+    rod.add(endCylinder)
     return rod;
   }
 
-  toMesh() {
-    const mergeGeo = new BufferGeometry();
-    const geos: BufferGeometry[] = [];
-    this.element.traverse((mesh: any) => {
-      if (mesh.isMesh) {
-        const geo = (mesh as Mesh).geometry.clone();
-        (mesh as Mesh).geometry.dispose(); // 防止内存溢出
-        if ((geo as Geometry).isGeometry) {
-          const bufferGeo = new BufferGeometry().fromGeometry(geo as Geometry);
-          geos.push(bufferGeo);
-        }
-        if ((geo as BufferGeometry).isBufferGeometry) {
-          geos.push(geo as BufferGeometry);
-        }
-      }
-    });
+  // toMesh() {
+  //   const mergeGeo = new BufferGeometry();
+  //   const geos: BufferGeometry[] = [];
+  //   this.element.traverse((mesh: any) => {
+  //     if (mesh.isMesh) {
+  //       const geo = (mesh as Mesh).geometry.clone();
+  //       (mesh as Mesh).geometry.dispose(); // 防止内存溢出
+  //       if ((geo as Geometry).isGeometry) {
+  //         const bufferGeo = new BufferGeometry().fromGeometry(geo as Geometry);
+  //         geos.push(bufferGeo);
+  //       }
+  //       if ((geo as BufferGeometry).isBufferGeometry) {
+  //         geos.push(geo as BufferGeometry);
+  //       }
+  //     }
+  //   });
 
-    var geometry = BufferGeometryUtils.mergeBufferGeometries(geos);
-    var endMaterial = new MeshLambertMaterial({ color: 0xffff00 });
-    var endCylinder = new Mesh(geometry, endMaterial);
-    // this.empty(this.element);
-    // this.element.add(endCylinder)
-    this.element = new Group().add(endCylinder);
-    console.log("this.element", this.element);
-    return mergeGeo;
-  }
+  //   var geometry = BufferGeometryUtils.mergeBufferGeometries(geos);
+  //   var endMaterial = new MeshLambertMaterial({ color: 0xffff00 });
+  //   var endCylinder = new Mesh(geometry, endMaterial);
+  //   // this.empty(this.element);
+  //   // this.element.add(endCylinder)
+  //   this.element = new Group().add(endCylinder);
+  //   console.log("this.element", this.element);
+  //   return mergeGeo;
+  // }
 
   // empty(group: Group) {
   //   console.log("gg");

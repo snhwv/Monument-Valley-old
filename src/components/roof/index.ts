@@ -1,3 +1,4 @@
+import { composeObject, getQuaternionFromAxisAndAngle } from "@/utils";
 import {
   CylinderBufferGeometry,
   MeshLambertMaterial,
@@ -9,15 +10,22 @@ import {
   ExtrudeGeometry,
   MeshPhongMaterial,
   Vector2,
+  Geometry,
   Curve,
-} from 'three';
-import { axis, unitLength } from '@/constents';
+  BoxBufferGeometry,
+  MeshBasicMaterial,
+  OctahedronBufferGeometry,
+  OctahedronGeometry
+} from "three";
+import { axis, unitLength } from "@/constents";
+import { subtract, intersect, union } from "@/utils/bsp";
 
 export default class Roof {
   element: Group = new Group();
 
   size = 1;
-
+  material = new MeshLambertMaterial({ color: 0x00ffff });
+  hatHeight = 28;
   constructor(size: number) {
     this.size = size;
     this.init();
@@ -27,36 +35,68 @@ export default class Roof {
   }
 
   generator() {
-    this.generateShape();
+    this.generatePedestal();
+    this.generateHat();
+    const largeSize = 1.4,smallSize = 1.2;
+    const octahedronLarge = this.generateOctahedron(largeSize);
+    const octahedronSmall = this.generateOctahedron(smallSize);
+    (octahedronLarge.geometry as Geometry).vertices[3] = new Vector3(0, -4, 0);
+    octahedronLarge.translateY(this.hatHeight + 2);
+    this.element.add(octahedronLarge)
+    octahedronSmall.translateY(this.hatHeight + 2 + largeSize + smallSize);
+    this.element.add(octahedronSmall)
   }
+  generateOctahedron(size: number) {
+    var geometry = new OctahedronGeometry(size);
+    var octahedron = new Mesh(geometry, this.material);
+    return octahedron;
+  }
+  generatePedestal() {
+    const thickness = 1;
+    var geometry = new BoxBufferGeometry(unitLength + 4, thickness, unitLength + 4);
 
-  generateShape() {
+    var cube = new Mesh(geometry, this.material);
+    cube.translateY(thickness / 2);
+    this.element.add(cube);
+  }
+  generateHat() {
     var shape = new Shape();
-    // shape.lineTo(unitLength * this.size, 0);
-    // shape.quadraticCurveTo(0, 20, 20, 20);
-    const p1 = new Vector2(-20, 15);
-    const p2 = new Vector2(30, 10);
-    const p3 = new Vector2(20, 30);
+    const p1 = new Vector2(-10, 18);
+    const p2 = new Vector2(15, 14);
+    const p3 = new Vector2(10, this.hatHeight);
     shape.bezierCurveTo(p1.x, p1.y, p3.x, p2.y, p3.x, p3.y);
-    const halfPoints = shape.getPoints();
-    shape.add(new Curve() )
-    shape.lineTo(p3.x, 0);
+    const reflectP1 = new Vector2(30, 18);
+    const reflectP2 = new Vector2(10, 14);
+    const reflectP3 = new Vector2(20, 0);
+    shape.bezierCurveTo(
+      reflectP2.x,
+      reflectP2.y,
+      reflectP1.x,
+      reflectP1.y,
+      reflectP3.x,
+      reflectP3.y
+    );
+    const depth = unitLength * 2;
     var extrudeSettings = {
-      depth: unitLength,
+      depth,
       bevelEnabled: false,
       curveSegments: 30
     };
 
-    var geometry = new ExtrudeGeometry(shape, extrudeSettings);
-
-    var mesh = new Mesh(geometry, new MeshPhongMaterial());
-    //   mesh.position.sub(
-    //     new Vector3(
-    //       (unitLength * this.size) / 2,
-    //       (unitLength * this.size) / 2,
-    //       unitLength / 2
-    //     )
-    //   );
+    var verticalGeometry = new ExtrudeGeometry(shape, extrudeSettings);
+    composeObject(
+      verticalGeometry,
+      new Vector3(-depth / 2, 0, 10),
+      getQuaternionFromAxisAndAngle(axis.y, Math.PI / 2)
+    );
+    var horizontalGeometry = new ExtrudeGeometry(shape, extrudeSettings);
+    composeObject(
+      horizontalGeometry,
+      new Vector3(-10, 0, -depth / 2),
+      getQuaternionFromAxisAndAngle(axis.y, 0)
+    );
+    const result = intersect(verticalGeometry, horizontalGeometry);
+    const mesh = new Mesh(result, this.material);
     this.element.add(mesh);
   }
 }
