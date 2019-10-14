@@ -1,3 +1,4 @@
+import { composeObject, getQuaternionFromAxisAndAngle } from '@/utils';
 import {
   BoxGeometry,
   MeshBasicMaterial,
@@ -5,22 +6,21 @@ import {
   Mesh,
   Vector2,
   Quaternion,
-  Vector3
-} from "three";
-import { scene } from "./base";
-import { squarePositionGenerator } from "../utils";
-import Valve from "@/components/valve";
-import Stairway from "@/components/stairway";
-import { axis, unitLength } from "@/constents";
-import {
-  QuarterCirclePathOuter,
-  CirclePathInner
-} from "@/components/circlePath";
-import Door from "@/components/door";
-import { intersect } from "@/utils/bsp";
-import ThreeBSP from "three-solid";
-import("./helpers");
-import("./light");
+  Vector3,
+  Object3D,
+} from 'three';
+import { scene } from './base';
+import { squarePositionGenerator } from '../utils';
+import Valve from '@/components/valve';
+import Stairway from '@/components/stairway';
+import { axis, unitLength } from '@/constents';
+import { QuarterCirclePathOuter, CirclePathInner } from '@/components/circlePath';
+import Door from '@/components/door';
+import { intersect, subtract } from '@/utils/bsp';
+import ThreeBSP from 'three-solid';
+import Roof from '@/components/roof';
+import('./helpers');
+import('./light');
 let geometry = new BoxGeometry(20, 20, 20);
 let material = new MeshLambertMaterial({ color: 0x00ff00 });
 //加入到场景
@@ -33,13 +33,11 @@ for (let i = 0; i < positions.length; i++) {
 let baseGeo = new BoxGeometry(5 * unitLength, 6 * unitLength, 5 * unitLength);
 let basematerial = new MeshLambertMaterial({ color: 0x00ffff });
 let baseMesh = new Mesh(baseGeo, basematerial);
-baseMesh.position.sub(
-  new Vector3(0, -((6 * unitLength) / 2 + unitLength / 2), 0)
-);
+baseMesh.position.sub(new Vector3(0, -((6 * unitLength) / 2 + unitLength / 2), 0));
 // scene.add(baseMesh)
 const valve = new Valve();
 console.log(valve.toMesh());
-scene.add(valve.element);
+// scene.add(valve.element);
 // const stairway = new Stairway(4,false).element;
 // scene.add(stairway);
 console.log(scene);
@@ -50,8 +48,15 @@ const circlePathOutter = new QuarterCirclePathOuter(4, 10).element;
 // scene.add(circlePathOutter);
 // const circlePath = new CirclePathInner(4, 0, Math.PI, false).element;
 // scene.add(circlePath);
-const door = new Door().element;
-// scene.add(door);
+const door = new Door();
+// scene.add(door.element);
 
-// const result = intersect(door, baseMesh);
+// const result = intersect(door.getGeometry(), baseMesh);
 // scene.add(result);
+const doorGeo = door.getGeometry().clone();
+composeObject(doorGeo, new Vector3(0,5 * unitLength / 2,5 * unitLength / 2), getQuaternionFromAxisAndAngle(axis.y, 0));
+const result = subtract(baseMesh, doorGeo);
+// scene.add(result);
+
+const roof = new Roof(2);
+scene.add(roof.element)
