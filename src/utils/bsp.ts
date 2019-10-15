@@ -30,7 +30,6 @@ export function subtract(objx: any, objy: any) {
   var objyBSP = new ThreeBSP(objy);
 
   var resultBSP = objxBSP.subtract(objyBSP);
-  console.log(resultBSP)
   var result = resultBSP.toGeometry();
   return result;
 }

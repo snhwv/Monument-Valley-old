@@ -6,6 +6,7 @@ declare namespace THREE {
   }
 }
 
+declare class SpinControls {}
 // declare class ThreeBSP {
 //   constructor(object: any);
 //   intersect(object3d: ThreeBSP): any;

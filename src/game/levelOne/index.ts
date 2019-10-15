@@ -1,4 +1,9 @@
-import { composeObject, getQuaternionFromAxisAndAngle } from "@/utils";
+import {
+  composeObject,
+  getQuaternionFromAxisAndAngle,
+  putTop,
+  putBottom
+} from "@/utils";
 import {
   BoxGeometry,
   MeshBasicMaterial,
@@ -25,6 +30,10 @@ import { intersect, subtract } from "@/utils/bsp";
 import ThreeBSP from "three-solid";
 import Roof from "@/components/roof";
 import HollowHolder from "@/components/hollowHolder";
+import EnterPoint from "@/components/enterPoint";
+import OuterPoint from "./OuterPoint";
+import CenterRotate from "./CenterRotate";
+import PartTriangle from "./PartTriangle";
 
 export default class LevelOne {
   mainMaterial = new MeshLambertMaterial({ color: 0x00ffff });
@@ -32,6 +41,7 @@ export default class LevelOne {
   centerCubeWidth: number = 5 * unitLength;
   centerCubeHeight: number = 6 * unitLength;
   rotableStair!: Stairway;
+  topHollowHolder!: HollowHolder;
   constructor() {
     this.init();
   }
@@ -42,29 +52,26 @@ export default class LevelOne {
     const rotableStair = this.generateRotableStair();
     const valve = this.generateValve();
     const staticStair = this.generateStaticStair();
+
+    // 屋顶下的进入部分
+    const enterPointOne = this.generateEnterPointOne();
+    // 出口部分
+    const outPoint = this.generateOutPoint();
+    // 中间可旋转的部分
+    const centerRotate = this.generateCenterRotate();
+    // 除开中间可旋转部分，组成培恩洛兹三角形的另外部分
+    const partTriangle = this.generatePartTriangle();
     scene.add(bottomCubs);
     scene.add(centerCube);
     scene.add(planePath);
     scene.add(rotableStair);
     scene.add(valve);
     scene.add(staticStair);
-
-    // const door = new Door();
-    // // scene.add(door.element);
-
-    // // const result = intersect(door.getGeometry(), baseMesh);
-    // // scene.add(result);
-    // const doorGeo = door.getGeometry().clone();
-    // composeObject(
-    //   doorGeo,
-    //   new Vector3(0, (5 * unitLength) / 2, (5 * unitLength) / 2),
-    //   getQuaternionFromAxisAndAngle(axis.y, 0)
-    // );
-    // const result = subtract(this.centerCube, doorGeo);
-    // // scene.add(result);
-
-    // const roof = new Roof(2);
-    // scene.add(roof.element);
+    scene.add(enterPointOne);
+    scene.add(outPoint);
+    scene.add(centerRotate);
+    scene.add(partTriangle);
+    centerRotate.rotateY(-Math.PI /2)
   }
 
   generateCenterCube() {
@@ -106,7 +113,7 @@ export default class LevelOne {
     const positions = squarePositionGenerator(new Vector2(), 7, unitLength);
     for (let i = 0; i < positions.length; i++) {
       const position = positions[i];
-      if (position.x > 0 && position.y > 0) {
+      if (position.x > 0 && position.y > unitLength) {
         let cube = new Mesh(geometry, material);
         cube.position.set(position.x, 0, position.y);
         loop.add(cube);
@@ -172,7 +179,7 @@ export default class LevelOne {
     largeStairwayGroup.rotateY(-Math.PI / 2);
     group.add(largeStairwayGroup);
 
-    const topHollowHolder = new HollowHolder(3 * unitLength + unitLength / 2);
+    const topHollowHolder = new HollowHolder(4 * unitLength);
     const topHollowHolderGroup = topHollowHolder.element;
     topHollowHolderGroup.position.add(relativePosition);
     topHollowHolderGroup.position.add(
@@ -182,6 +189,7 @@ export default class LevelOne {
         -unitLength * 3
       )
     );
+    this.topHollowHolder = topHollowHolder;
     group.add(topHollowHolder.element);
 
     const bottomhollowHolder = new HollowHolder(
@@ -189,15 +197,72 @@ export default class LevelOne {
       5 * unitLength
     );
     const bottomhollowHolderGroup = bottomhollowHolder.element;
-    bottomhollowHolderGroup.position.add(topHollowHolderGroup.position);
-    bottomhollowHolderGroup.translateY(
-      -(topHollowHolder.height / 2 + bottomhollowHolder.height / 2)
-    );
-    // bottomhollowHolderGroup.position.add(
-    //     new Vector3(0, (unitLength * 2) + unitLength / 2 + bottomhollowHolder.height / 2, (-unitLength * 3))
-    //   );
+
+    putBottom(bottomhollowHolderGroup, topHollowHolderGroup);
+    // bottomhollowHolderGroup.position.add(topHollowHolderGroup.position);
+    // bottomhollowHolderGroup.translateY(
+    //   -(topHollowHolder.height / 2 + bottomhollowHolder.height / 2)
+    // );
     group.add(bottomhollowHolder.element);
 
     return group;
+  }
+
+  generateEnterPointOne() {
+    const group = new Group();
+
+    // 上楼梯后的镂空架子
+    const topHollowHolderGroup = this.topHollowHolder.element;
+
+    const geometry = new BoxBufferGeometry(unitLength, unitLength, unitLength);
+    const bottomCube = new Mesh(geometry, this.mainMaterial);
+    putTop(bottomCube, topHollowHolderGroup);
+    const midCube = bottomCube.clone();
+    midCube.position.set(0, 0, 0);
+    putTop(midCube, bottomCube);
+    const topCube = bottomCube.clone();
+    topCube.position.set(0, 0, 0);
+    putTop(topCube, midCube);
+
+    const enterPoint = new EnterPoint();
+    const enterPointGroup = enterPoint.element;
+    putTop(enterPointGroup, topCube);
+
+    const roof = new Roof();
+    putTop(roof.element, enterPointGroup);
+
+    group.add(bottomCube);
+    group.add(midCube);
+    group.add(topCube);
+    group.add(enterPointGroup);
+    group.add(roof.element);
+    return group;
+  }
+
+  generateOutPoint() {
+    const outerPoint = new OuterPoint();
+    const outerPointGroup = outerPoint.element;
+    outerPointGroup.position.add(
+      new Vector3(
+        this.centerCubeWidth / 2 + unitLength,
+        (3 * unitLength) / 2,
+        0
+      )
+    );
+    return outerPoint.element;
+  }
+  generateCenterRotate() {
+    const centerRotate = new CenterRotate();
+    const centerRotateGroup = centerRotate.element;
+    putTop(centerRotateGroup, this.centerCube);
+
+    return centerRotateGroup;
+  }
+  generatePartTriangle() {
+    const partTriangle = new PartTriangle();
+    const partTriangleGroup = partTriangle.element;
+    // putTop(partTriangleGroup, this.centerCube);
+
+    return partTriangleGroup;
   }
 }

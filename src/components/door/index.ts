@@ -24,16 +24,18 @@ export default class Door {
   deep: number;
   doorHeight = 2 * unitLength;
   geo: any;
-  height!:number;
+  height!: number;
   constructor({
-    doorWidth = unitLength - 2 * 2,
+    doorWidth,
     doorHeight = 2 * unitLength,
     deep = 0,
     edge = 2
+  }: {
+    [key: string]: number;
   }) {
-    this.doorWidth = doorWidth;
-    this.doorHeight = doorHeight;
     this.edge = edge;
+    this.doorWidth = doorWidth || unitLength - this.edge * 2;
+    this.doorHeight = doorHeight;
     this.deep = deep || this.doorWidth;
     this.init();
   }

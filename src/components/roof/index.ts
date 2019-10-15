@@ -1,4 +1,4 @@
-import { composeObject, getQuaternionFromAxisAndAngle } from "@/utils";
+import { composeObject, getQuaternionFromAxisAndAngle, getBox } from "@/utils";
 import {
   CylinderBufferGeometry,
   MeshLambertMaterial,
@@ -26,7 +26,7 @@ export default class Roof {
   size = 1;
   material = new MeshLambertMaterial({ color: 0x00ffff });
   hatHeight = 28;
-  constructor(size: number) {
+  constructor(size: number = 1) {
     this.size = size;
     this.init();
   }
@@ -45,6 +45,7 @@ export default class Roof {
     this.element.add(octahedronLarge)
     octahedronSmall.translateY(this.hatHeight + 2 + largeSize + smallSize);
     this.element.add(octahedronSmall)
+    this.element.translateY(-getBox(this.element).YWidth / 2);
   }
   generateOctahedron(size: number) {
     var geometry = new OctahedronGeometry(size);
@@ -57,6 +58,7 @@ export default class Roof {
 
     var cube = new Mesh(geometry, this.material);
     cube.translateY(thickness / 2);
+    
     this.element.add(cube);
   }
   generateHat() {
@@ -97,6 +99,7 @@ export default class Roof {
     );
     const result = intersect(verticalGeometry, horizontalGeometry);
     const mesh = new Mesh(result, this.material);
+    
     this.element.add(mesh);
   }
 }

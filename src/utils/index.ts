@@ -1,4 +1,13 @@
-import { Vector2, Vector3, Quaternion, Object3D, Matrix4, Geometry } from "three";
+import {
+  Vector2,
+  Vector3,
+  Quaternion,
+  Object3D,
+  Matrix4,
+  Geometry,
+  Mesh,
+  Box3
+} from "three";
 
 export function squarePositionGenerator(
   center: Vector2 = new Vector2(),
@@ -49,7 +58,7 @@ export function composeObjectWidthMultiply(
     scale
   );
   rotWorldMatrix.multiply(obj.matrix); // pre-multiply
-  obj.applyMatrix( rotWorldMatrix );
+  obj.applyMatrix(rotWorldMatrix);
 }
 export function composeObject(
   geo: any,
@@ -63,13 +72,36 @@ export function composeObject(
     rotation,
     scale
   );
-  geo.applyMatrix( rotWorldMatrix );
+  geo.applyMatrix(rotWorldMatrix);
 }
 
-
-export function getQuaternionFromAxisAndAngle(axis: Vector3,angle: number){
-
+export function getQuaternionFromAxisAndAngle(axis: Vector3, angle: number) {
   var quaternion = new Quaternion();
-  quaternion.setFromAxisAngle(axis,angle);
+  quaternion.setFromAxisAngle(axis, angle);
   return quaternion;
-} 
+}
+
+export function getBox(obj: Object3D) {
+  const box = new Box3();
+  box.setFromObject(obj);
+  return {
+    XWidth: box.max.x - box.min.x,
+    YWidth: box.max.y - box.min.y,
+    ZWidth: box.max.z - box.min.z,
+    max: box.max,
+    min: box.min
+  };
+}
+export function putTop(targetObj: Object3D, relativeObj: Object3D) {
+  const relativeBox = getBox(relativeObj);
+  const targetBox = getBox(targetObj);
+  targetObj.position.add(relativeObj.position);
+  targetObj.translateY((relativeBox.YWidth + targetBox.YWidth) / 2);
+}
+
+export function putBottom(targetObj: Object3D,relativeObj: Object3D) {
+  const relativeBox = getBox(relativeObj);
+  const targetBox = getBox(targetObj);
+  targetObj.position.add(relativeObj.position);
+  targetObj.translateY(-(relativeBox.YWidth + targetBox.YWidth) / 2);
+}
