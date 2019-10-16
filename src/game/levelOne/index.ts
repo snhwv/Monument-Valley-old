@@ -16,7 +16,8 @@ import {
   Group,
   BoxBufferGeometry
 } from "three";
-import { scene } from "../base";
+import * as THREE from "three";
+import { scene, camera, renderer } from "../base";
 import { squarePositionGenerator } from "@/utils";
 import Valve from "@/components/valve";
 import Stairway from "@/components/stairway";
@@ -34,6 +35,7 @@ import EnterPoint from "@/components/enterPoint";
 import OuterPoint from "./OuterPoint";
 import CenterRotate from "./CenterRotate";
 import PartTriangle from "./PartTriangle";
+import { SpinControl } from "@/utils/SpinControl";
 
 export default class LevelOne {
   mainMaterial = new MeshLambertMaterial({ color: 0x00ffff });
@@ -42,6 +44,7 @@ export default class LevelOne {
   centerCubeHeight: number = 6 * unitLength;
   rotableStair!: Stairway;
   topHollowHolder!: HollowHolder;
+  valve!:Group;
   constructor() {
     this.init();
   }
@@ -51,6 +54,7 @@ export default class LevelOne {
     const planePath = this.generatePlanePath();
     const rotableStair = this.generateRotableStair();
     const valve = this.generateValve();
+    this.valve = valve;
     const staticStair = this.generateStaticStair();
 
     // 屋顶下的进入部分
@@ -66,12 +70,16 @@ export default class LevelOne {
     scene.add(planePath);
     scene.add(rotableStair);
     scene.add(valve);
-    scene.add(staticStair);
-    scene.add(enterPointOne);
-    scene.add(outPoint);
-    scene.add(centerRotate);
-    scene.add(partTriangle);
-    centerRotate.rotateY(-Math.PI /2)
+    
+    SpinControl(valve,new Vector3(0,0,1),valve.position.z);
+    // scene.add(staticStair);
+    // scene.add(enterPointOne);
+    // scene.add(outPoint);
+    // scene.add(centerRotate);
+    // scene.add(partTriangle);
+    // this.test();
+  }
+  test() {
   }
 
   generateCenterCube() {

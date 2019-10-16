@@ -1,3 +1,8 @@
+interface Window {
+  THREE: any;
+  SpinControls: any;
+}
+
 declare module "three/examples/js/controls/OrbitControls";
 
 declare namespace THREE {
@@ -5,18 +10,7 @@ declare namespace THREE {
     constructor(object: any, domElement: any);
   }
 }
-
-declare class SpinControls {}
 // declare class ThreeBSP {
 //   constructor(object: any);
 //   intersect(object3d: ThreeBSP): any;
-// }
-
-// declare module "threebsp" {
-//   // import ThreeBSP from 'threebsp';
-//   export class ThreeBSP {
-//     constructor(object: any);
-//     intersect(object3d: ThreeBSP): any;
-//   }
-//   export default ThreeBSP;
 // }

@@ -1,6 +1,5 @@
 import { Scene, OrthographicCamera, WebGLRenderer } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import SpinControls from "../assets/js/SpinControls";
 let scene: Scene, camera: OrthographicCamera, renderer: WebGLRenderer;
 //创建场景
 scene = new Scene();
@@ -31,12 +30,10 @@ camera.position.set(400, 400, 400);
 const controls = new OrbitControls(camera, renderer.domElement);
 
 // 旋转控制器
-
 //渲染循环
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 }
 animate();
-
-export { scene, camera, renderer };
+export { scene, camera, renderer,controls };
