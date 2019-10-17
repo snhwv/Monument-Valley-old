@@ -7,7 +7,8 @@ import THREE, {
   Quaternion,
   Geometry,
   BufferGeometry,
-  Matrix4
+  Matrix4,
+  Plane
 } from "three";
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils";
 import {
@@ -16,6 +17,7 @@ import {
   getQuaternionFromAxisAndAngle
 } from "@/utils";
 import { axis } from "@/constents";
+import { SpinControl } from "@/utils/SpinControl";
 
 export default class Valve {
   element: Group = new Group();
@@ -28,6 +30,8 @@ export default class Valve {
   rodEndWidth = 7;
   rodEndR = 3;
 
+  plane!: Plane;
+  planeNormal!: Vector3;
   constructor() {
     this.init();
   }
@@ -40,6 +44,7 @@ export default class Valve {
     const rod = this.generateRod();
     this.element.add(plug);
     this.element.add(rod);
+    this.initRotation();
   }
 
   // 中间的阀塞
@@ -114,54 +119,10 @@ export default class Valve {
     rod.add(endCylinder)
     return rod;
   }
-
-  // toMesh() {
-  //   const mergeGeo = new BufferGeometry();
-  //   const geos: BufferGeometry[] = [];
-  //   this.element.traverse((mesh: any) => {
-  //     if (mesh.isMesh) {
-  //       const geo = (mesh as Mesh).geometry.clone();
-  //       (mesh as Mesh).geometry.dispose(); // 防止内存溢出
-  //       if ((geo as Geometry).isGeometry) {
-  //         const bufferGeo = new BufferGeometry().fromGeometry(geo as Geometry);
-  //         geos.push(bufferGeo);
-  //       }
-  //       if ((geo as BufferGeometry).isBufferGeometry) {
-  //         geos.push(geo as BufferGeometry);
-  //       }
-  //     }
-  //   });
-
-  //   var geometry = BufferGeometryUtils.mergeBufferGeometries(geos);
-  //   var endMaterial = new MeshLambertMaterial({ color: 0xffff00 });
-  //   var endCylinder = new Mesh(geometry, endMaterial);
-  //   // this.empty(this.element);
-  //   // this.element.add(endCylinder)
-  //   this.element = new Group().add(endCylinder);
-  //   console.log("this.element", this.element);
-  //   return mergeGeo;
-  // }
-
-  // empty(group: Group) {
-  //   console.log("gg");
-  //   console.log(group.children);
-  //   for (let i = 0; i < group.children.length; i++) {
-  //     const obj = group.children[i];
-  //     console.log(obj as Group);
-  //     console.log((obj as Group).isGroup);
-  //     if ((obj as Group).isGroup) {
-  //       console.log("is G");
-  //       this.empty(obj as Group);
-  //     } else if (obj.parent) {
-  //       // obj.parent.remove(obj);
-  //     }
-  //   }
-  //   // group.traverse((mesh: any) => {
-  //   //   if (mesh.isMesh) {
-  //   //     group.remove(mesh);
-  //   //   } else {
-
-  //   //   }
-  //   // });
-  // }
+  initRotation() {
+    this.planeNormal = axis.y.clone();
+    this.plane = new Plane(this.planeNormal, 0);
+    // this.element.add(this.plane)
+    SpinControl(this);
+  }
 }
