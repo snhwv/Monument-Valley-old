@@ -135,27 +135,8 @@ export default class LevelOne {
     valveGroup.translateZ(this.rotableStair.depth / 2 + valve.plugWidth / 2);
     valveGroup.rotateOnAxis(axis.x, Math.PI / 2);
 
-    // const worldNormal = valveGroup.localToWorld(new Vector3(1,0,0));
-    // console.log(worldNormal)
-    const point = new Vector3(0, 1, 0);
-    var arrowHelper = new ArrowHelper(point.normalize(), new Vector3(), 100, 0xffff00);
-    valve.plane.applyMatrix4(valveGroup.matrixWorld);
+    valve.updatePlane();
 
-    var rotWorldMatrix = new Matrix4(); //创建一个4*4矩阵
-  rotWorldMatrix.compose(
-    this.rotableStair.element.position.clone().add(new Vector3(0,0,this.rotableStair.depth / 2 + valve.plugWidth / 2)),
-    getQuaternionFromAxisAndAngle(axis.x, Math.PI / 2),
-    new Vector3(1,1,1)
-  );
-  // 两个矩阵结果 是一样的，问题在于运行时，rotWorldMatrix算出来了，valveGroup.matrixWorld没有算出来
-  point.applyMatrix4(valveGroup.matrixWorld);
-    console.log(point)
-    console.log(rotWorldMatrix)
-    console.log(rotWorldMatrix.elements[14])
-    console.log(valveGroup.matrixWorld)
-    console.log(valveGroup.matrixWorld.elements[14])
-    scene.add(arrowHelper)
-    // valve.plane.normal = worldNormal;
     return valveGroup;
   }
 

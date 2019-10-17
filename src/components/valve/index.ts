@@ -125,4 +125,9 @@ export default class Valve {
     // this.element.add(this.plane)
     SpinControl(this);
   }
+  updatePlane() {
+    const valveGroup = this.element;
+    valveGroup.updateMatrixWorld();
+    this.plane.applyMatrix4(valveGroup.matrixWorld);
+  }
 }
