@@ -8,7 +8,8 @@ import THREE, {
   Geometry,
   BufferGeometry,
   Matrix4,
-  Plane
+  Plane,
+  ArrowHelper
 } from "three";
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils";
 import {
@@ -31,7 +32,6 @@ export default class Valve {
   rodEndR = 3;
 
   plane!: Plane;
-  planeNormal!: Vector3;
   constructor() {
     this.init();
   }
@@ -44,7 +44,7 @@ export default class Valve {
     const rod = this.generateRod();
     this.element.add(plug);
     this.element.add(rod);
-    this.initRotation();
+    // this.initRotation();
   }
 
   // 中间的阀塞
@@ -112,22 +112,22 @@ export default class Valve {
       composeObject(
         endCylinder,
         new Vector3(0, 0, 0),
-        getQuaternionFromAxisAndAngle(axis.y, Math.PI / 2 * i)
+        getQuaternionFromAxisAndAngle(axis.y, (Math.PI / 2) * i)
       );
       rod.add(mesh);
     }
-    rod.add(endCylinder)
+    rod.add(endCylinder);
     return rod;
   }
   initRotation() {
-    this.planeNormal = axis.y.clone();
-    this.plane = new Plane(this.planeNormal, 0);
-    // this.element.add(this.plane)
-    SpinControl(this);
+    // this.planeNormal = axis.y.clone();
+    // const distance = 0;
+    // this.plane = new Plane(this.planeNormal, distance);
+    // SpinControl(this);
   }
   updatePlane() {
-    const valveGroup = this.element;
-    valveGroup.updateMatrixWorld();
-    this.plane.applyMatrix4(valveGroup.matrixWorld);
+    // const valveGroup = this.element;
+    // valveGroup.updateMatrixWorld();
+    // this.plane.applyMatrix4(valveGroup.matrixWorld);
   }
 }

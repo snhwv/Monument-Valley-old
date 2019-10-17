@@ -9,18 +9,20 @@ import {
   Group
 } from "three";
 import { renderer, camera, scene, controls } from "@/game/base";
+import Rotable from "./Rotable";
 
 var mouseDown = false;
 let fromPoint = new Vector3();
 let toPoint = new Vector3();
-let rotateScene: any;
 let raycaster = new Raycaster();
+let rotateObjectId: string;
 // let plane!: Plane;
 let helper!: PlaneHelper;
-export function SpinControl(
-  object: any,
-) {
-
+export function SpinControl(object: Rotable) {
+  // object.rotateElement.updateMatrix();
+  // object.rotateElement.updateMatrixWorld();
+  // console.log(object.rotateElement.localToWorld(new Vector3(1,0,0)));
+    // object.element.updateWorldMatrix(true,true);
   helper = new PlaneHelper(object.plane, 100, 0xffff00);
   scene.add(helper);
   renderer.domElement.addEventListener("mousedown", e => {
@@ -37,87 +39,73 @@ export function SpinControl(
 function mousedown(object: any, e: any) {
   e.preventDefault();
   let mouse = new Vector2();
-  let objectElement = object.element as Group;
+  let rotateElement = object.rotateElement as Group;
   mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(mouse, camera);
-  const result = raycaster.intersectObject(objectElement, true);
-  if (result.length) {
-    mouseDown = true;
-    controls.enabled = false;
-    // 将第一次的交点放入fromPoint中
-    raycaster.ray.intersectPlane(object.plane, fromPoint);
-    fromPoint.sub(objectElement.position);
+  const result = raycaster.intersectObject(scene, true);
+  if (result.length && !rotateObjectId) {
+    // console.log(result);
+    // console.log(raycaster);
+    if(isChild(rotateElement, result[0].object)){
+
+      rotateObjectId = object.element.uuid;
+      mouseDown = true;
+      controls.enabled = false;
+      // 将第一次的交点放入fromPoint中
+      raycaster.ray.intersectPlane(object.plane, fromPoint);
+      fromPoint.sub(rotateElement.position);
+    }
   }
 }
 
-function mousemove(object: any, e: any) {
-  if (!mouseDown) {
+function isChild(parent: Object3D, child: Object3D) {
+  let result = false;
+  parent.traverse(mesh => {
+    if(child === mesh) {
+      result = true;
+    }
+  });
+  return result;
+}
+
+function mousemove(object: Rotable, e: any) {
+  if (!mouseDown || object.element.uuid !== rotateObjectId) {
     return;
   }
   const normal = (object.plane as Plane).normal;
   e.preventDefault();
   let mouse = new Vector2();
-  let objectElement = object.element as Group;
+  let objectElement = object.rotateElement as Group;
   mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(mouse, camera);
   raycaster.ray.intersectPlane(object.plane, toPoint);
   toPoint.sub(objectElement.position);
-  var arrowHelper = new ArrowHelper( toPoint.normalize(),objectElement.position, 100, 0xffff00 );
-  scene.add(arrowHelper);
+
+  const direction = getRotateDirection(object.plane.normal);
+
   const rotateAngle = toPoint.angleTo(fromPoint);
-  console.log(rotateAngle);
+
   // plane
-  object.rotateOnWorldAxis(normal, rotateAngle);
+  object.element.rotateOnAxis(normal, rotateAngle * direction);
+  // object.element.children.map(item => {
+  //   item.rotateOnWorldAxis(normal, rotateAngle * direction);
+  // });
   fromPoint.copy(toPoint);
-  //   mouseX = e.clientX;
-  //   mouseY = e.clientY;
-  //   rotateScene(deltaX, deltaY);
+}
+
+// 获取旋转方向
+function getRotateDirection(planeNormal: Vector3) {
+  const velocity = new Vector3();
+  velocity.crossVectors(fromPoint, toPoint);
+  return velocity.dot(planeNormal) > 0 ? 1 : -1;
 }
 
 function mouseup(evt: any) {
   evt.preventDefault();
-  console.log("mouseup");
+  console.log('up')
   controls.enabled = true;
+  rotateObjectId = "";
   mouseDown = false;
 }
-
-// function addMouseHandler(canvas: any) {
-//   canvas.addEventListener(
-//     "mousemove",
-//     function(e: any) {
-//       onMouseMove(e);
-//     },
-//     false
-//   );
-//   canvas.addEventListener(
-//     "mousedown",
-//     function(e: any) {
-//       onMouseDown(e);
-//     },
-//     false
-//   );
-//   canvas.addEventListener(
-//     "mouseup",
-//     function(e: any) {
-//       onMouseUp(e);
-//     },
-//     false
-//   );
-// }
-
-// function onMouseDown(evt: any) {
-//     evt.preventDefault();
-
-//     console.log("mousedown");
-//     mouseDown = true;
-//     mouseX = evt.clientX;
-//     mouseY = evt.clientY;
-//   }
-
-// rotateScene = (deltaX:any, deltaY:any) => {
-// this.valve.rotation.y += deltaX / 100;
-// this.valve.rotation.x += deltaY / 100;
-// }
-// addMouseHandler(renderer.domElement);

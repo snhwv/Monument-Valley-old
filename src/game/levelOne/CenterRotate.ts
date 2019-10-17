@@ -37,7 +37,7 @@ export default class CenterRotate {
   cubeSize = unitLength;
   positions!: Vector2[];
   loopCube!: Mesh;
-
+  rotateElement: Group = new Group();
   constructor() {
     this.init();
   }
@@ -53,6 +53,7 @@ export default class CenterRotate {
     );
     this.generateLoopCube();
     this.generateLoopCylinder();
+    this.element.add(this.rotateElement)
     this.generateOneTriangle();
     this.generatePartTriangle();
   }
@@ -97,14 +98,16 @@ export default class CenterRotate {
     loop.add(cylinderClone2);
     loop.add(cylinderClone3);
     loop.add(cylinderClone4);
-    this.element.add(loop);
+    this.rotateElement.add(loop);
+    // this.element.add(loop);
   }
   generateLoopCube() {
     const edgeWidth = this.sizeWidth * this.cubeSize;
     let geometry = new BoxGeometry(edgeWidth, this.cubeSize, edgeWidth);
     let material = new MeshLambertMaterial({ color: 0x00ff00 });
     this.loopCube = new Mesh(geometry, material);
-    this.element.add(this.loopCube);
+    this.rotateElement.add(this.loopCube);
+    // this.element.add(this.loopCube);
   }
   generateOneTriangle() {
     const group = new Group();

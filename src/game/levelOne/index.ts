@@ -1,4 +1,10 @@
-import { composeObject, getQuaternionFromAxisAndAngle, putTop, putBottom, composeObjectWidthMultiply } from '@/utils';
+import {
+  composeObject,
+  getQuaternionFromAxisAndAngle,
+  putTop,
+  putBottom,
+  composeObjectWidthMultiply
+} from "@/utils";
 import {
   BoxGeometry,
   MeshBasicMaterial,
@@ -11,25 +17,29 @@ import {
   Group,
   BoxBufferGeometry,
   ArrowHelper,
-  Matrix4,
-} from 'three';
-import * as THREE from 'three';
-import { scene, camera, renderer } from '../base';
-import { squarePositionGenerator } from '@/utils';
-import Valve from '@/components/valve';
-import Stairway from '@/components/stairway';
-import { axis, unitLength } from '@/constents';
-import { QuarterCirclePathOuter, CirclePathInner } from '@/components/circlePath';
-import Door from '@/components/door';
-import { intersect, subtract } from '@/utils/bsp';
-import ThreeBSP from 'three-solid';
-import Roof from '@/components/roof';
-import HollowHolder from '@/components/hollowHolder';
-import EnterPoint from '@/components/enterPoint';
-import OuterPoint from './OuterPoint';
-import CenterRotate from './CenterRotate';
-import PartTriangle from './PartTriangle';
-import { SpinControl } from '@/utils/SpinControl';
+  Matrix4
+} from "three";
+import * as THREE from "three";
+import { scene, camera, renderer } from "../base";
+import { squarePositionGenerator } from "@/utils";
+import Valve from "@/components/valve";
+import Stairway from "@/components/stairway";
+import { axis, unitLength } from "@/constents";
+import {
+  QuarterCirclePathOuter,
+  CirclePathInner
+} from "@/components/circlePath";
+import Door from "@/components/door";
+import { intersect, subtract } from "@/utils/bsp";
+import ThreeBSP from "three-solid";
+import Roof from "@/components/roof";
+import HollowHolder from "@/components/hollowHolder";
+import EnterPoint from "@/components/enterPoint";
+import OuterPoint from "./OuterPoint";
+import CenterRotate from "./CenterRotate";
+import PartTriangle from "./PartTriangle";
+import { SpinControl } from "@/utils/SpinControl";
+import Rotable from "@/utils/Rotable";
 
 export default class LevelOne {
   mainMaterial = new MeshLambertMaterial({ color: 0x00ffff });
@@ -48,7 +58,7 @@ export default class LevelOne {
     const planePath = this.generatePlanePath();
     const rotableStair = this.generateRotableStair();
     const valve = this.generateValve();
-    this.valve = valve;
+
     const staticStair = this.generateStaticStair();
 
     // 屋顶下的进入部分
@@ -59,24 +69,57 @@ export default class LevelOne {
     const centerRotate = this.generateCenterRotate();
     // 除开中间可旋转部分，组成培恩洛兹三角形的另外部分
     const partTriangle = this.generatePartTriangle();
-    // scene.add(bottomCubs);
-    // scene.add(centerCube);
-    // scene.add(planePath);
-    // scene.add(rotableStair);
-    scene.add(valve);
-
-    // scene.add(staticStair);
-    // scene.add(enterPointOne);
-    // scene.add(outPoint);
+    scene.add(bottomCubs);
+    scene.add(centerCube);
+    scene.add(planePath);
+    scene.add(staticStair);
+    scene.add(enterPointOne);
+    scene.add(outPoint);
     // scene.add(centerRotate);
-    // scene.add(partTriangle);
-    // this.test();
+    scene.add(partTriangle);
+
+    const rotableGroup = new Group();
+    // rotableGroup.applyMatrix( new THREE.Matrix4().makeTranslation(valve.position.x, valve.position.y, valve.position.z) );
+    // rotableGroup.applyMatrix( new THREE.Matrix4().makeTranslation(valve.position.x, valve.position.y, valve.position.z) );
+
+    rotableGroup.add(valve);
+    rotableGroup.add(rotableStair);
+    // rotableGroup.children.map(item => {
+    //   item.position.sub(valve.position)
+    // })
+    rotableGroup.updateWorldMatrix(true, true);
+    const rotable = new Rotable(rotableGroup, valve, new Vector3(0, 0, 1));
+
+    centerRotate.element.updateWorldMatrix(true, true);
+    const centerRotable = new Rotable(
+      centerRotate.element,
+      centerRotate.rotateElement,
+      new Vector3(0, 1, 0)
+    );
+
+    var box = new THREE.Box3();
+    box.setFromObject(rotableGroup);
+    var helper = new THREE.Box3Helper(box, new THREE.Color(0xffff00));
+    scene.add(helper);
+    
+    scene.add(rotable.element);
+    scene.add(centerRotable.element);
   }
 
   generateCenterCube() {
-    let centerCubeGeo = new BoxGeometry(this.centerCubeWidth, this.centerCubeHeight, this.centerCubeWidth);
+    let centerCubeGeo = new BoxGeometry(
+      this.centerCubeWidth,
+      this.centerCubeHeight,
+      this.centerCubeWidth
+    );
     let centerCube = new Mesh(centerCubeGeo, this.mainMaterial);
-    centerCube.position.sub(new Vector3(0, -(this.centerCubeHeight / 2 + unitLength / 2 + unitLength / 2), 0));
+    centerCube.position.sub(
+      new Vector3(
+        0,
+        -(this.centerCubeHeight / 2 + unitLength / 2 + unitLength / 2),
+        0
+      )
+    );
     this.centerCube = new Mesh(centerCubeGeo, this.mainMaterial);
     return centerCube;
   }
@@ -134,7 +177,6 @@ export default class LevelOne {
     valveGroup.position.add(this.rotableStair.element.position);
     valveGroup.translateZ(this.rotableStair.depth / 2 + valve.plugWidth / 2);
     valveGroup.rotateOnAxis(axis.x, Math.PI / 2);
-
     valve.updatePlane();
 
     return valveGroup;
@@ -165,7 +207,9 @@ export default class LevelOne {
     const largeStairway = new Stairway(2, false);
     const largeStairwayGroup = largeStairway.element;
     largeStairwayGroup.position.add(relativePosition);
-    largeStairwayGroup.position.add(new Vector3(0, (unitLength * 3) / 2, (-unitLength * 3) / 2));
+    largeStairwayGroup.position.add(
+      new Vector3(0, (unitLength * 3) / 2, (-unitLength * 3) / 2)
+    );
     largeStairwayGroup.rotateY(-Math.PI / 2);
     group.add(largeStairwayGroup);
 
@@ -173,12 +217,19 @@ export default class LevelOne {
     const topHollowHolderGroup = topHollowHolder.element;
     topHollowHolderGroup.position.add(relativePosition);
     topHollowHolderGroup.position.add(
-      new Vector3(0, unitLength * 2 + unitLength / 2 + topHollowHolder.height / 2, -unitLength * 3)
+      new Vector3(
+        0,
+        unitLength * 2 + unitLength / 2 + topHollowHolder.height / 2,
+        -unitLength * 3
+      )
     );
     this.topHollowHolder = topHollowHolder;
     group.add(topHollowHolder.element);
 
-    const bottomhollowHolder = new HollowHolder(6 * unitLength + unitLength / 2, 5 * unitLength);
+    const bottomhollowHolder = new HollowHolder(
+      6 * unitLength + unitLength / 2,
+      5 * unitLength
+    );
     const bottomhollowHolderGroup = bottomhollowHolder.element;
 
     putBottom(bottomhollowHolderGroup, topHollowHolderGroup);
@@ -225,7 +276,13 @@ export default class LevelOne {
   generateOutPoint() {
     const outerPoint = new OuterPoint();
     const outerPointGroup = outerPoint.element;
-    outerPointGroup.position.add(new Vector3(this.centerCubeWidth / 2 + unitLength, (3 * unitLength) / 2, 0));
+    outerPointGroup.position.add(
+      new Vector3(
+        this.centerCubeWidth / 2 + unitLength,
+        (3 * unitLength) / 2,
+        0
+      )
+    );
     return outerPoint.element;
   }
   generateCenterRotate() {
@@ -233,7 +290,7 @@ export default class LevelOne {
     const centerRotateGroup = centerRotate.element;
     putTop(centerRotateGroup, this.centerCube);
 
-    return centerRotateGroup;
+    return centerRotate;
   }
   generatePartTriangle() {
     const partTriangle = new PartTriangle();
