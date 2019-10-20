@@ -3,7 +3,9 @@ import {
   getQuaternionFromAxisAndAngle,
   putTop,
   putBottom,
-  composeObjectWidthMultiply
+  composeObjectWidthMultiply,
+  walkPlaneCreator,
+  getBox
 } from "@/utils";
 import {
   BoxGeometry,
@@ -17,7 +19,10 @@ import {
   Group,
   BoxBufferGeometry,
   ArrowHelper,
-  Matrix4
+  Matrix4,
+  PlaneGeometry,
+  Box3,
+  DoubleSide
 } from "three";
 import * as THREE from "three";
 import { scene, camera, renderer } from "../base";
@@ -40,6 +45,8 @@ import CenterRotate from "./CenterRotate";
 import PartTriangle from "./PartTriangle";
 import { SpinControl } from "@/utils/SpinControl";
 import Rotable from "@/utils/Rotable";
+import TWEEN from "@tweenjs/tween.js";
+import WalkPlane from "@/utils/WalkPlane";
 
 export default class LevelOne {
   mainMaterial = new MeshLambertMaterial({ color: 0x00ffff });
@@ -49,6 +56,7 @@ export default class LevelOne {
   rotableStair!: Stairway;
   topHollowHolder!: HollowHolder;
   valve!: Group;
+  centerRotable!: Rotable;
   constructor() {
     this.init();
   }
@@ -75,36 +83,164 @@ export default class LevelOne {
     scene.add(staticStair);
     scene.add(enterPointOne);
     scene.add(outPoint);
-    // scene.add(centerRotate);
     scene.add(partTriangle);
 
     const rotableGroup = new Group();
-    // rotableGroup.applyMatrix( new THREE.Matrix4().makeTranslation(valve.position.x, valve.position.y, valve.position.z) );
-    // rotableGroup.applyMatrix( new THREE.Matrix4().makeTranslation(valve.position.x, valve.position.y, valve.position.z) );
 
     rotableGroup.add(valve);
     rotableGroup.add(rotableStair);
-    // rotableGroup.children.map(item => {
-    //   item.position.sub(valve.position)
-    // })
-    rotableGroup.updateWorldMatrix(true, true);
+
     const rotable = new Rotable(rotableGroup, valve, new Vector3(0, 0, 1));
 
-    centerRotate.element.updateWorldMatrix(true, true);
+    const boxdata = getBox(centerRotate.element);
+
+    // 这是中间可旋转部分的box中心，相对于原点，所以使用这个中心vector3校准旋转中心
+    const centerRotateCenter = boxdata.min.add(boxdata.max).multiplyScalar(0.5);
+
     const centerRotable = new Rotable(
       centerRotate.element,
       centerRotate.rotateElement,
-      new Vector3(0, 1, 0)
+      new Vector3(0, 1, 0),
+      new Vector3(centerRotateCenter.x, 0, centerRotateCenter.z)
     );
-
-    var box = new THREE.Box3();
-    box.setFromObject(rotableGroup);
-    var helper = new THREE.Box3Helper(box, new THREE.Color(0xffff00));
-    scene.add(helper);
-    
+    centerRotable.element.rotateOnAxis(axis.y, -Math.PI / 2);
     scene.add(rotable.element);
     scene.add(centerRotable.element);
+    this.centerRotable = centerRotable;
+
+    this.changeNodesDataStruct();
+
+    this.centerRotationBindCall();
+
+    // this.test();
   }
+
+  centerRotationBindCall() {
+    const centerRotable = this.centerRotable;
+    const groupedPlanesObject = window.groupedPlanesObject;
+    const originGroupedPlanesObject = window.originGroupedPlanesObject;
+    console.log(groupedPlanesObject);
+
+    
+    centerRotable.animationStartCallbacks.push(() => {
+      const resets: {
+        [key: string]: number;
+      } = {
+        staticStairWay: 4,
+        centerRotateBottomPath: 2,
+        rotateTrigger: 0,
+        partTriangleOne: 2,
+        partTriangleTWo: 3,
+        centerRotateTopPath: 3,
+        enterPointOne: 0
+      };
+      const keys = Object.keys(resets);
+
+      
+    let material = new MeshLambertMaterial({ color: 0x000000,side: DoubleSide });
+      keys.map(item => {
+        const plane = groupedPlanesObject[item][resets[item]];
+        plane.connectPlane = [
+          ...originGroupedPlanesObject[item][resets[item]].connectPlane
+        ];
+        console.log(plane.plane)
+        plane.plane.material = material;
+      });
+      console.log(window.originGroupedPlanesObject);
+      console.log(window.groupedPlanesObject);
+    });
+
+
+    centerRotable.animationEndCallbacks.push(() => {
+      console.log(groupedPlanesObject);
+      const relativeNormal = centerRotable.element
+        .worldToLocal(axis.x.clone())
+        .round();
+      console.log(relativeNormal);
+      const calls = [
+        {
+          condition: { x: 1, z: 0 },
+          call: () => {
+            groupedPlanesObject.centerRotateBottomPath[2].connectPlane.push(
+              groupedPlanesObject.rotateTrigger[0]
+            );
+          }
+        },
+        {
+          condition: { x: 0, z: 1 },
+          call: () => {
+            groupedPlanesObject.centerRotateBottomPath[2].connectPlane.push(
+              groupedPlanesObject.rotateTrigger[0]
+            );
+          }
+        },
+        {
+          condition: { x: 1, z: 0 },
+          call: () => {
+            groupedPlanesObject.centerRotateBottomPath[2].connectPlane.push(
+              groupedPlanesObject.rotateTrigger[0]
+            );
+          }
+        },
+        {
+          condition: { x: 1, z: 0 },
+          call: () => {
+            groupedPlanesObject.centerRotateBottomPath[2].connectPlane.push(
+              groupedPlanesObject.rotateTrigger[0]
+            );
+          }
+        }
+      ];
+    });
+  }
+
+  changeNodesDataStruct() {
+    const nodes = window.nodes;
+    const obj: {
+      [key: string]: any[];
+    } = {};
+    nodes.map(item => {
+      if (obj[item.belongGroup]) {
+        obj[item.belongGroup][item.index] = item;
+      } else {
+        obj[item.belongGroup] = [];
+        obj[item.belongGroup][item.index] = item;
+      }
+    });
+    const keys = Object.keys(obj);
+    keys.map(item => {
+      this.generateConnection(obj[item]);
+    });
+    window.groupedPlanesObject = obj;
+    const origin: {
+      [key: string]: any[];
+    } = {};
+    keys.map(item => {
+      origin[item] = obj[item].map(plane => ({
+        ...plane,
+        connectPlane: [...plane.connectPlane]
+      }));
+    });
+
+    window.originGroupedPlanesObject = origin;
+  }
+
+  generateConnection(userDataArr: any[]) {
+    const localArr = [...userDataArr];
+    for (let i = 0; i < localArr.length; i++) {
+      if (i) {
+        localArr[i].connectPlane.push(localArr[i - 1]);
+      }
+    }
+    localArr.reverse();
+    for (let i = 0; i < localArr.length; i++) {
+      if (i) {
+        localArr[i].connectPlane.push(localArr[i - 1]);
+      }
+    }
+  }
+
+  test() {}
 
   generateCenterCube() {
     let centerCubeGeo = new BoxGeometry(
@@ -126,11 +262,13 @@ export default class LevelOne {
 
   generateBottomLoopCube() {
     let geometry = new BoxGeometry(unitLength, unitLength, unitLength);
-    let material = new MeshLambertMaterial({ color: 0x00ff00 });
+
+    let material = new MeshLambertMaterial({ color: 0xffff00 });
     const loop = new Group();
     const positions = squarePositionGenerator(new Vector2(), 5, unitLength);
     for (let i = 0; i < positions.length; i++) {
       let cube = new Mesh(geometry, material);
+
       cube.position.set(positions[i].x, 0, positions[i].y);
       loop.add(cube);
     }
@@ -143,14 +281,25 @@ export default class LevelOne {
     let material = new MeshLambertMaterial({ color: 0x00ff00 });
     const loop = new Group();
     const positions = squarePositionGenerator(new Vector2(), 7, unitLength);
+
+    let index = 0;
     for (let i = 0; i < positions.length; i++) {
       const position = positions[i];
       if (position.x > 0 && position.y > unitLength) {
         let cube = new Mesh(geometry, material);
+        const plane = walkPlaneCreator(unitLength, unitLength);
+        plane.rotateOnAxis(axis.x, Math.PI / 2);
+        plane.translateZ(-(2 / 2 + 0.01));
+        plane.userData.belongGroup = "bottomPath";
+        plane.userData.index = index;
+        index++;
+        cube.add(plane);
+
         cube.position.set(position.x, 0, position.y);
         loop.add(cube);
       }
     }
+
     loop.translateY(2 / 2 + 3 * unitLength);
     return loop;
   }
@@ -158,6 +307,10 @@ export default class LevelOne {
   generateRotableStair() {
     const stairSize = 3;
     const stairway = new Stairway(stairSize, false);
+    stairway.walkPlanes.map((item, index) => {
+      item.userData.belongGroup = "rotateStairWay";
+      item.userData.index = index;
+    });
     const stairwayGroup = stairway.element;
     const halfStair = (stairSize * unitLength) / 2;
     stairwayGroup.position.sub(
@@ -195,16 +348,35 @@ export default class LevelOne {
       const cloneCube = cube.clone();
       cloneCube.position.add(relativePosition);
       cloneCube.translateZ(-unitLength * i);
+      if (!i) {
+        const plane = walkPlaneCreator(unitLength, unitLength);
+        plane.userData.belongGroup = "staticStairWay";
+        plane.userData.index = 1;
+        composeObject(
+          plane,
+          new Vector3(0, unitLength / 2 + 0.005, 0),
+          getQuaternionFromAxisAndAngle(axis.x, Math.PI / 2)
+        );
+        cloneCube.add(plane);
+      }
       group.add(cloneCube);
     }
 
     const smallStairway = new Stairway(1, false);
+    smallStairway.walkPlanes.map((item, index) => {
+      item.userData.belongGroup = "staticStairWay";
+      item.userData.index = index;
+    });
     const smallStairwayGroup = smallStairway.element;
     smallStairwayGroup.position.add(relativePosition);
     smallStairwayGroup.translateX(unitLength);
     group.add(smallStairwayGroup);
 
     const largeStairway = new Stairway(2, false);
+    largeStairway.walkPlanes.reverse().map((item, index) => {
+      item.userData.belongGroup = "staticStairWay";
+      item.userData.index = index + 2;
+    });
     const largeStairwayGroup = largeStairway.element;
     largeStairwayGroup.position.add(relativePosition);
     largeStairwayGroup.position.add(
@@ -230,6 +402,17 @@ export default class LevelOne {
       6 * unitLength + unitLength / 2,
       5 * unitLength
     );
+
+    const plane = walkPlaneCreator(unitLength, unitLength);
+    plane.userData.belongGroup = "staticStairWay";
+    plane.userData.index = 4;
+    composeObject(
+      plane,
+      new Vector3(0, (6 * unitLength + unitLength / 2) / 2 + 0.005, 0),
+      getQuaternionFromAxisAndAngle(axis.x, Math.PI / 2)
+    );
+    bottomhollowHolder.element.add(plane);
+
     const bottomhollowHolderGroup = bottomhollowHolder.element;
 
     putBottom(bottomhollowHolderGroup, topHollowHolderGroup);
@@ -256,6 +439,16 @@ export default class LevelOne {
     putTop(midCube, bottomCube);
     const topCube = bottomCube.clone();
     topCube.position.set(0, 0, 0);
+
+    const plane = walkPlaneCreator(unitLength, unitLength);
+    plane.userData.belongGroup = "enterPointOne";
+    plane.userData.index = 0;
+    composeObject(
+      plane,
+      new Vector3(0, unitLength / 2 + 0.005, 0),
+      getQuaternionFromAxisAndAngle(axis.x, Math.PI / 2)
+    );
+    topCube.add(plane);
     putTop(topCube, midCube);
 
     const enterPoint = new EnterPoint();

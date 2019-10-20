@@ -1,5 +1,5 @@
 Arguments: 
-  D:\nodejs\node.exe D:\nodejs\node_global\node_modules\yarn\bin\yarn.js add @types/three.js
+  D:\nodejs\node.exe D:\nodejs\node_global\node_modules\yarn\bin\yarn.js add @types/es6-tween
 
 PATH: 
   C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;D:\nodejs\;D:\nodejs\node_global\;D:\git\Git\bin\;D:\JDK\jdk-1.8\bin;D:\flutterSDK\flutter\bin\;D:\androidSDK\android-sdk-windows\platform-tools;C:\Program Files\TortoiseSVN\bin;C:\Users\snhwv\AppData\Local\Microsoft\WindowsApps;;D:\vscode\Microsoft VS Code\bin;C:\Users\snhwv\AppData\Roaming\npm
@@ -14,7 +14,7 @@ Platform:
   win32 x64
 
 Trace: 
-  Error: http://registry.npm.taobao.org/@types%2fthree.js: Not found
+  Error: http://registry.npm.taobao.org/@types%2fes6-tween: Not found
       at Request.params.callback [as _callback] (D:\nodejs\node_global\node_modules\yarn\lib\cli.js:66091:18)
       at Request.self.callback (D:\nodejs\node_global\node_modules\yarn\lib\cli.js:129590:22)
       at Request.emit (events.js:198:13)
@@ -37,12 +37,15 @@ npm manifest:
     "license": "MIT",
     "scripts": {
       "dev": "./node_modules/.bin/webpack --config ./config/webpack.dev.config.js --mode development",
-      "start": "webpack-dev-server --config ./config/webpack.dev.config.js"
+      "serve": "webpack-dev-server --config ./config/webpack.dev.config.js"
     },
     "dependencies": {
+      "@types/three": "^0.103.2",
       "clean-webpack-plugin": "^3.0.0",
+      "es6-tween": "^5.5.10",
       "html-webpack-plugin": "^3.2.0",
-      "three.js": "^0.77.1",
+      "three": "^0.109.0",
+      "three-solid": "^0.0.3",
       "ts-loader": "^6.2.0",
       "typescript": "^3.6.3",
       "webpack": "^4.41.0",
@@ -99,6 +102,13 @@ Lockfile:
     version "1.0.4"
     resolved "https://registry.npm.taobao.org/@types/tapable/download/@types/tapable-1.0.4.tgz#b4ffc7dc97b498c969b360a41eee247f82616370"
     integrity sha1-tP/H3Je0mMlps2CkHu4kf4JhY3A=
+  
+  "@types/three@^0.103.2":
+    version "0.103.2"
+    resolved "https://registry.npm.taobao.org/@types/three/download/@types/three-0.103.2.tgz#f7d49130001c551941a0ded757def810579aafc4"
+    integrity sha1-99SRMAAcVRlBoN7XV974EFear8Q=
+    dependencies:
+      three "*"
   
   "@types/uglify-js@*":
     version "3.0.4"
@@ -1381,6 +1391,11 @@ Lockfile:
       is-callable "^1.1.4"
       is-date-object "^1.0.1"
       is-symbol "^1.0.2"
+  
+  es6-tween@^5.5.10:
+    version "5.5.10"
+    resolved "https://registry.npm.taobao.org/es6-tween/download/es6-tween-5.5.10.tgz#1267d602279fe0fcb98f796f05e745945b04c1ed"
+    integrity sha1-EmfWAief4Py5j3lvBedFlFsEwe0=
   
   escape-html@~1.0.3:
     version "1.0.3"
@@ -3973,17 +3988,15 @@ Lockfile:
       source-map "~0.6.1"
       source-map-support "~0.5.12"
   
-  three.js@^0.77.1:
-    version "0.77.1"
-    resolved "https://registry.npm.taobao.org/three.js/download/three.js-0.77.1.tgz#07858a8749e4b627a31083252a2d987776cca32a"
-    integrity sha1-B4WKh0nktiejEIMlKi2Yd3bMoyo=
-    dependencies:
-      three "0.77.0"
+  three-solid@^0.0.3:
+    version "0.0.3"
+    resolved "https://registry.npm.taobao.org/three-solid/download/three-solid-0.0.3.tgz#67ada3d51fdbc5fdc25ce668d67b5b8374de0574"
+    integrity sha1-Z62j1R/bxf3CXOZo1ntbg3TeBXQ=
   
-  three@0.77.0:
-    version "0.77.0"
-    resolved "https://registry.npm.taobao.org/three/download/three-0.77.0.tgz?cache=0&sync_timestamp=1569868713686&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fthree%2Fdownload%2Fthree-0.77.0.tgz#8b0b1b00047689ceaa020d480a562ca60d87ff37"
-    integrity sha1-iwsbAAR2ic6qAg1IClYspg2H/zc=
+  three@*, three@^0.109.0:
+    version "0.109.0"
+    resolved "https://registry.npm.taobao.org/three/download/three-0.109.0.tgz?cache=0&sync_timestamp=1569868713686&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fthree%2Fdownload%2Fthree-0.109.0.tgz#611c9ef860d10bd107695cead6c6abcd2422e5fd"
+    integrity sha1-YRye+GDRC9EHaVzq1sarzSQi5f0=
   
   through2@^2.0.0:
     version "2.0.5"

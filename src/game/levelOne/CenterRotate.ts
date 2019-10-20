@@ -3,7 +3,8 @@ import {
   getQuaternionFromAxisAndAngle,
   getBox,
   putTop,
-  squarePositionGenerator
+  squarePositionGenerator,
+  walkPlaneCreator
 } from "@/utils";
 import {
   CylinderBufferGeometry,
@@ -53,7 +54,7 @@ export default class CenterRotate {
     );
     this.generateLoopCube();
     this.generateLoopCylinder();
-    this.element.add(this.rotateElement)
+    this.element.add(this.rotateElement);
     this.generateOneTriangle();
     this.generatePartTriangle();
   }
@@ -134,8 +135,19 @@ export default class CenterRotate {
       getQuaternionFromAxisAndAngle(axis.y, 0)
     );
     const triangleEdgeGeo = subtract(subtract(geometry, doorGeo2), doorGeo);
-        const triangleEdge = new Mesh(triangleEdgeGeo, material);
-    putTop(triangleEdge,this.loopCube);
+    const triangleEdge = new Mesh(triangleEdgeGeo, material);
+
+    const plane = walkPlaneCreator(unitLength, unitLength);
+    plane.userData.belongGroup = 'centerRotateTopPath';
+    plane.userData.index = 0;
+      composeObject(
+        plane,
+        new Vector3(0, (unitLength * 8) / 2 + 0.005, 0),
+        getQuaternionFromAxisAndAngle(axis.x, Math.PI / 2)
+      );
+      triangleEdge.add(plane);
+
+    putTop(triangleEdge, this.loopCube);
 
     group.add(triangleEdge);
 
@@ -151,17 +163,41 @@ export default class CenterRotate {
     for (let i = 0; i < 3; i++) {
       const cloneMesh = mesh.clone();
       cloneMesh.translateX(i * unitLength);
+
+      const plane = walkPlaneCreator(unitLength, unitLength);
+      plane.userData.belongGroup = 'centerRotateBottomPath';
+      plane.userData.index = i;
+      // if(i === 2) {
+      //   plane.userData.isConnectPoint = true;
+      // }
+      composeObject(
+        plane,
+        new Vector3(0, unitLength / 2 + 0.005, 0),
+        getQuaternionFromAxisAndAngle(axis.x, Math.PI / 2)
+      );
+      cloneMesh.add(plane);
+
       bottomGroup.add(cloneMesh);
     }
-    bottomGroup.position.add(new Vector3(unitLength,unitLength,0));
+    bottomGroup.position.add(new Vector3(unitLength, unitLength, 0));
 
     for (let i = 0; i < 3; i++) {
       const cloneMesh = mesh.clone();
       cloneMesh.translateZ(i * unitLength);
+      const plane = walkPlaneCreator(unitLength, unitLength);
+      plane.userData.belongGroup = 'centerRotateTopPath';
+      plane.userData.index = i + 1;
+      composeObject(
+        plane,
+        new Vector3(0, unitLength / 2 + 0.005, 0),
+        getQuaternionFromAxisAndAngle(axis.x, Math.PI / 2)
+      );
+      cloneMesh.add(plane);
+
       topGroup.add(cloneMesh);
     }
-    topGroup.position.add(new Vector3(0,8 * unitLength,unitLength));
-    
+    topGroup.position.add(new Vector3(0, 8 * unitLength, unitLength));
+
     this.element.add(bottomGroup);
     this.element.add(topGroup);
   }

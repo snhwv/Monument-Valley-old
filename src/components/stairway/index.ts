@@ -7,16 +7,19 @@ import {
   Quaternion,
   Shape,
   ExtrudeGeometry,
-  MeshPhongMaterial
+  MeshPhongMaterial,
+  Vector2
 } from "three";
 import { axis, unitLength } from "@/constents";
+import { walkPlaneCreator } from "@/utils";
 
 export default class Stairway {
   element: Group = new Group();
 
+  walkPlanes!: Mesh[];
   size = 1;
   haSpedestal = false;
-  stairNumPerCube = 8;
+  stairNumPerCube = 8; // 一个单位长度有多少个阶梯
   stairWidth = unitLength / this.stairNumPerCube;
   depth = unitLength;
   constructor(size: number, haSpedestal: boolean = false) {
@@ -61,8 +64,10 @@ export default class Stairway {
     };
 
     var geometry = new ExtrudeGeometry(shape, extrudeSettings);
-
+    const planes = this.generateWalkPlanes();
+    this.walkPlanes = planes;
     var mesh = new Mesh(geometry, new MeshPhongMaterial());
+    mesh.add(...planes);
     mesh.position.sub(
       new Vector3(
         (unitLength * this.size) / 2,
@@ -73,4 +78,20 @@ export default class Stairway {
     this.element.add(mesh);
   }
 
+  generateWalkPlanes() {
+    const width = new Vector2(unitLength,unitLength).length();
+    const planes= [];
+    for(let i = 0;i<this.size;i++){
+      const plane = walkPlaneCreator(width,this.depth);
+      const x = unitLength * (i + 0.5) + this.stairWidth;
+
+      plane.position.add(new Vector3(x, this.line(x),this.depth / 2))
+      // plane.translateZ();
+      plane.rotateX(Math.PI / 2);
+      plane.rotateY(-Math.PI / 4);
+      
+      planes.push(plane);
+    }
+    return planes;
+  }
 }

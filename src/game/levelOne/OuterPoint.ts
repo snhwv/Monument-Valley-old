@@ -2,7 +2,8 @@ import {
   composeObject,
   getQuaternionFromAxisAndAngle,
   getBox,
-  putTop
+  putTop,
+  walkPlaneCreator
 } from "@/utils";
 import {
   CylinderBufferGeometry,
@@ -133,6 +134,17 @@ export default class OuterPoint {
     );
     middleGeo = subtract(middleGeo, doorGeo);
     const mesh = new Mesh(middleGeo, material);
+
+    const plane = walkPlaneCreator(unitLength, unitLength);
+    plane.userData.belongGroup = "outPointOne";
+    plane.userData.index = 0;
+    composeObject(
+      plane,
+      new Vector3(unitLength / 2, -this.height / 2 + 0.005, 0),
+      getQuaternionFromAxisAndAngle(axis.x, Math.PI / 2)
+    );
+    mesh.add(plane);
+
     mesh.translateY(this.height);
     this.middleMesh = mesh;
     this.element.add(mesh);
@@ -140,6 +152,17 @@ export default class OuterPoint {
   generateTop() {
     const topHollowHolder = new HollowHolder(3 * unitLength);
     const topHollowHolderGroup = topHollowHolder.element;
+
+    const plane = walkPlaneCreator(unitLength, unitLength);
+    plane.userData.belongGroup = "rotateTrigger";
+    plane.userData.index = 0;
+    composeObject(
+      plane,
+      new Vector3(0, (3 * unitLength) / 2 + 0.005, 0),
+      getQuaternionFromAxisAndAngle(axis.x, Math.PI / 2)
+    );
+    topHollowHolderGroup.add(plane);
+
     putTop(topHollowHolderGroup, this.middleMesh);
     topHollowHolderGroup.translateX(unitLength / 2);
     this.element.add(topHollowHolderGroup);

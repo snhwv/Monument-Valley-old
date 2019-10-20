@@ -6,8 +6,12 @@ import {
   Matrix4,
   Geometry,
   Mesh,
-  Box3
+  Box3,
+  PlaneGeometry,
+  MeshLambertMaterial,
+  DoubleSide
 } from "three";
+import { axis } from "@/constents";
 
 export function squarePositionGenerator(
   center: Vector2 = new Vector2(),
@@ -104,4 +108,19 @@ export function putBottom(targetObj: Object3D,relativeObj: Object3D) {
   const targetBox = getBox(targetObj);
   targetObj.position.add(relativeObj.position);
   targetObj.translateY(-(relativeBox.YWidth + targetBox.YWidth) / 2);
+}
+
+
+export function walkPlaneCreator(width: number, height: number) {
+  let planeGeo = new PlaneGeometry(width, height);
+  let material = new MeshLambertMaterial({
+    color: 0xffff00,
+    side: DoubleSide
+  });
+  const plane = new Mesh(planeGeo, material);
+  plane.userData.normal = axis.z.clone();
+  plane.userData.plane = plane;
+  plane.userData.connectPlane = [];
+  window.nodes.push(plane.userData);
+  return plane;
 }

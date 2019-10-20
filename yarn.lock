@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@tweenjs/tween.js@^18.3.1":
+  version "18.3.1"
+  resolved "https://registry.npm.taobao.org/@tweenjs/tween.js/download/@tweenjs/tween.js-18.3.1.tgz#8b15f551be164ff6ba88014d355674e0d0d7a574"
+  integrity sha1-ixX1Ub4WT/a6iAFNNVZ04NDXpXQ=
+
 "@types/anymatch@*":
   version "1.3.1"
   resolved "https://registry.npm.taobao.org/@types/anymatch/download/@types/anymatch-1.3.1.tgz?cache=0&sync_timestamp=1567532209205&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Fanymatch%2Fdownload%2F%40types%2Fanymatch-1.3.1.tgz#336badc1beecb9dacc38bea2cf32adf627a8421a"
@@ -47,6 +52,11 @@
   integrity sha1-99SRMAAcVRlBoN7XV974EFear8Q=
   dependencies:
     three "*"
+
+"@types/tween.js@^17.2.0":
+  version "17.2.0"
+  resolved "https://registry.npm.taobao.org/@types/tween.js/download/@types/tween.js-17.2.0.tgz#25f98311daecb165ab91ee2cd7f17a9b1e6cc30c"
+  integrity sha1-JfmDEdrssWWrke4s1/F6mx5swww=
 
 "@types/uglify-js@*":
   version "3.0.4"

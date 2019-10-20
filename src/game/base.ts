@@ -1,5 +1,8 @@
 import { Scene, OrthographicCamera, WebGLRenderer } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import TWEEN from "@tweenjs/tween.js";
+
+window.nodes = [];
 let scene: Scene, camera: OrthographicCamera, renderer: WebGLRenderer;
 //创建场景
 scene = new Scene();
@@ -33,7 +36,8 @@ const controls = new OrbitControls(camera, renderer.domElement);
 //渲染循环
 function animate() {
   requestAnimationFrame(animate);
+  TWEEN.update();
   renderer.render(scene, camera);
 }
 animate();
-export { scene, camera, renderer,controls };
+export { scene, camera, renderer, controls };

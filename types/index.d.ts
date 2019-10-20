@@ -1,5 +1,9 @@
 interface Window {
   THREE: any;
+  nodes: any[];
+  groupedPlanesObject: any;
+  originGroupedPlanesObject: any;
+  adaPalne: any;
   SpinControls: any;
 }
 
