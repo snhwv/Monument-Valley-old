@@ -57,6 +57,7 @@ export default class LevelOne {
   topHollowHolder!: HollowHolder;
   valve!: Group;
   centerRotable!: Rotable;
+  stairRotable!: Rotable;
   constructor() {
     this.init();
   }
@@ -90,7 +91,7 @@ export default class LevelOne {
     rotableGroup.add(valve);
     rotableGroup.add(rotableStair);
 
-    const rotable = new Rotable(rotableGroup, valve, new Vector3(0, 0, 1));
+    const stairRotable = new Rotable(rotableGroup, valve, new Vector3(0, 0, 1));
 
     const boxdata = getBox(centerRotate.element);
 
@@ -104,15 +105,79 @@ export default class LevelOne {
       new Vector3(centerRotateCenter.x, 0, centerRotateCenter.z)
     );
     centerRotable.element.rotateOnAxis(axis.y, -Math.PI / 2);
-    scene.add(rotable.element);
+    scene.add(stairRotable.element);
     scene.add(centerRotable.element);
     this.centerRotable = centerRotable;
+    this.stairRotable = stairRotable;
 
     this.changeNodesDataStruct();
 
     this.centerRotationBindCall();
+    this.stairRotableBindCall();
 
     // this.test();
+  }
+
+  stairRotableBindCall() {
+    const stairRotable = this.stairRotable;
+    const groupedPlanesObject = window.groupedPlanesObject;
+    const originGroupedPlanesObject = window.originGroupedPlanesObject;
+    console.log(groupedPlanesObject);
+
+    stairRotable.animationStartCallbacks.push(() => {
+      const resets = [
+        {
+          groupName: 'rotateStairWay',
+          index: 0
+        },
+        {
+          groupName: 'rotateStairWay',
+          index: 2
+        },
+        {
+          groupName: 'bottomPath',
+          index: 3
+        },
+        {
+          groupName: 'staticStairWay',
+          index: 0
+        },
+      ]
+
+      let material = new MeshLambertMaterial({
+        color: 0x000000,
+        side: DoubleSide
+      });
+
+      resets.map(item => {
+        const plane = groupedPlanesObject[item.groupName][item.index];
+        plane.connectPlane = [
+          ...originGroupedPlanesObject[item.groupName][item.index].connectPlane
+        ];
+        console.log(plane.plane);
+        plane.plane.material = material;
+      })
+      console.log(window.originGroupedPlanesObject);
+      console.log(window.groupedPlanesObject);
+    });
+
+    stairRotable.animationEndCallbacks.push(() => {
+      console.log(groupedPlanesObject);
+      const relativeNormal = stairRotable.element
+        .worldToLocal(axis.x.clone())
+        .round();
+      console.log('relativeNormal',relativeNormal);
+      const calls = [
+        {
+          condition: { x: 1, z: 0 },
+          call: () => {
+            groupedPlanesObject.centerRotateBottomPath[2].connectPlane.push(
+              groupedPlanesObject.rotateTrigger[0]
+            );
+          }
+        }
+      ];
+    });
   }
 
   centerRotationBindCall() {
@@ -121,7 +186,6 @@ export default class LevelOne {
     const originGroupedPlanesObject = window.originGroupedPlanesObject;
     console.log(groupedPlanesObject);
 
-    
     centerRotable.animationStartCallbacks.push(() => {
       const resets: {
         [key: string]: number;
@@ -136,20 +200,21 @@ export default class LevelOne {
       };
       const keys = Object.keys(resets);
 
-      
-    let material = new MeshLambertMaterial({ color: 0x000000,side: DoubleSide });
+      let material = new MeshLambertMaterial({
+        color: 0x000000,
+        side: DoubleSide
+      });
       keys.map(item => {
         const plane = groupedPlanesObject[item][resets[item]];
         plane.connectPlane = [
           ...originGroupedPlanesObject[item][resets[item]].connectPlane
         ];
-        console.log(plane.plane)
+        console.log(plane.plane);
         plane.plane.material = material;
       });
       console.log(window.originGroupedPlanesObject);
       console.log(window.groupedPlanesObject);
     });
-
 
     centerRotable.animationEndCallbacks.push(() => {
       console.log(groupedPlanesObject);
