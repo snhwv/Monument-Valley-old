@@ -93,8 +93,6 @@ export default class PartTriangle {
 
       const plane = walkPlaneCreator(unitLength, unitLength);
       plane.userData.belongGroup = "partTriangleTWo";
-      // console.log(cloneMesh.position)
-      // plane.userData.index = i + 1;
 
       if (i < 2) {
         this.coverCubes.push(cloneMesh);
@@ -153,6 +151,5 @@ export default class PartTriangle {
     });
     geo.faces = geo.faces.filter((face: any) => face);
     transparentCube.geometry = geo;
-    console.log(transparentCube);
   }
 }

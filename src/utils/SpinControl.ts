@@ -216,7 +216,6 @@ function calibrator(object: Rotable) {
       object.element.quaternion.copy(startQuat.normalize());
     })
     .onComplete(() => {
-      console.log("ggg");
       object.animationEndCallbacks.map(callback => {
         callback();
       });

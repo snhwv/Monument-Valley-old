@@ -37,7 +37,6 @@ export default class WalkPlane {
 
   constructor( plane: Mesh) {
     this.palne = plane;
-    console.log(plane)
     this.init();
   }
   init() {

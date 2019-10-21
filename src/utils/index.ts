@@ -121,6 +121,7 @@ export function walkPlaneCreator(width: number, height: number) {
   plane.userData.normal = axis.z.clone();
   plane.userData.plane = plane;
   plane.userData.connectPlane = [];
+  plane.userData.uuid = plane.uuid;
   window.nodes.push(plane.userData);
   return plane;
 }
