@@ -18,7 +18,6 @@ import {
   getQuaternionFromAxisAndAngle
 } from "@/utils";
 import { axis } from "@/constents";
-import { SpinControl } from "@/utils/SpinControl";
 
 export default class Valve {
   element: Group = new Group();
@@ -123,7 +122,6 @@ export default class Valve {
     // this.planeNormal = axis.y.clone();
     // const distance = 0;
     // this.plane = new Plane(this.planeNormal, distance);
-    // SpinControl(this);
   }
   updatePlane() {
     // const valveGroup = this.element;

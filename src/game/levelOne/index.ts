@@ -5,7 +5,8 @@ import {
   putBottom,
   composeObjectWidthMultiply,
   walkPlaneCreator,
-  getBox
+  getBox,
+  listenPlanes
 } from "@/utils";
 import {
   BoxGeometry,
@@ -43,12 +44,11 @@ import EnterPoint from "@/components/enterPoint";
 import OuterPoint from "./OuterPoint";
 import CenterRotate from "./CenterRotate";
 import PartTriangle from "./PartTriangle";
-import { SpinControl } from "@/utils/SpinControl";
 import Rotable from "@/utils/Rotable";
 import TWEEN from "@tweenjs/tween.js";
-import WalkPlane from "@/utils/WalkPlane";
-import { find } from "@/utils/DFS";
 import { createMGraph, MGraph, Floyd, PrintAll } from "@/utils/floyd";
+import { SpinControl } from "@/utils/SpinControl";
+import Ada from "@/utils/ada";
 
 export default class LevelOne {
   mainMaterial = new MeshLambertMaterial({ color: 0x00ffff });
@@ -60,6 +60,7 @@ export default class LevelOne {
   valve!: Group;
   centerRotable!: Rotable;
   stairRotable!: Rotable;
+  ada!: Ada;
   constructor() {
     this.init();
   }
@@ -80,6 +81,8 @@ export default class LevelOne {
     const centerRotate = this.generateCenterRotate();
     // 除开中间可旋转部分，组成培恩洛兹三角形的另外部分
     const partTriangle = this.generatePartTriangle();
+    // 生成艾达
+
     scene.add(bottomCubs);
     scene.add(centerCube);
     scene.add(planePath);
@@ -92,9 +95,8 @@ export default class LevelOne {
 
     rotableGroup.add(valve);
     rotableGroup.add(rotableStair);
-
     const stairRotable = new Rotable(rotableGroup, valve, new Vector3(0, 0, 1));
-
+    stairRotable.element.rotateOnAxis(axis.z, Math.PI);
     const boxdata = getBox(centerRotate.element);
 
     // 这是中间可旋转部分的box中心，相对于原点，所以使用这个中心vector3校准旋转中心
@@ -114,40 +116,41 @@ export default class LevelOne {
 
     this.changeNodesDataStruct();
 
+    const spinControl = new SpinControl();
+    spinControl.add(centerRotable);
+    spinControl.add(stairRotable);
+    spinControl.listen();
     const groupedPlanesObject = window.groupedPlanesObject;
     // find(groupedPlanesObject.bottomPath[0],groupedPlanesObject.bottomPath[3]);
     this.centerRotationBindCall();
     this.stairRotableBindCall();
+    listenPlanes();
 
+    this.generateAda();
     // this.test();
   }
 
-  generateMGraph() {
-    const nodes = window.nodes;
-    const graph: any[][] = [];
-    const nodesLength = nodes.length;
+  generateAda() {
+    const groupedPlanesObject = window.groupedPlanesObject;
+    const initPlaneData = groupedPlanesObject.bottomPath[0];
+    const initPosition = new Vector3();
+    const plane = initPlaneData.plane as Mesh;
 
-    for (let i = 0; i < nodesLength; i++) {
-      graph[i] = [];
-      for (let j = 0; j < nodesLength; j++) {
-        graph[i][j] = Infinity;
-      }
-    }
-    for (let i = 0; i < nodesLength; i++) {
-      const node = nodes[i];
-      node.connectPlane.map((connectNode: any) => {
-        const indexOfNodes = nodes.indexOf(connectNode);
-        graph[i][indexOfNodes] = 1;
-      });
-    }
-    return graph;
+    const quat = new Quaternion();
+    const scale = new Vector3();
+    
+    plane.updateWorldMatrix(true,false)
+    plane.getWorldPosition(initPosition)
+
+    const ada = new Ada(initPosition);
+    scene.add(ada.element);
+    this.ada = ada;
+    initPlaneData.hasAda = true;
   }
-
   stairRotableBindCall() {
     const stairRotable = this.stairRotable;
     const groupedPlanesObject = window.groupedPlanesObject;
     const originGroupedPlanesObject = window.originGroupedPlanesObject;
-    console.log(groupedPlanesObject);
 
     stairRotable.animationStartCallbacks.push(() => {
       const resets = [
@@ -204,13 +207,6 @@ export default class LevelOne {
               ]
             ];
             this.generateAnimationConnect(connects);
-
-            this.generateMGraph();
-            const g = new MGraph(window.nodes.length);
-            createMGraph(this.generateMGraph(),g);
-            Floyd(g);
-            PrintAll(g);
-            // const path = main();
           }
         }
       ];
@@ -265,40 +261,95 @@ export default class LevelOne {
         .sub(centerRotable.element.position)
         .round();
       console.log("relativeNormal", relativeNormal);
+      console.log("nodes", window.groupedPlanesObject);
+
       const calls = [
         {
-          condition: { x: 1, z: 0 },
+          condition: { x: -1, z: 0 },
           call: () => {
-            groupedPlanesObject.centerRotateBottomPath[2].connectPlane.push(
-              groupedPlanesObject.rotateTrigger[0]
-            );
+            const connects = [
+              [
+                {
+                  groupName: "staticStairWay",
+                  index: 4
+                },
+                {
+                  groupName: "centerRotateBottomPath",
+                  index: 2
+                }
+              ]
+            ];
+            this.generateAnimationConnect(connects);
           }
         },
         {
           condition: { x: 0, z: 1 },
           call: () => {
-            groupedPlanesObject.centerRotateBottomPath[2].connectPlane.push(
-              groupedPlanesObject.rotateTrigger[0]
-            );
+            const connects = [
+              [
+                {
+                  groupName: "centerRotateTopPath",
+                  index: 3
+                },
+                {
+                  groupName: "enterPointOne",
+                  index: 0
+                }
+              ]
+            ];
+            this.generateAnimationConnect(connects);
           }
         },
         {
           condition: { x: 1, z: 0 },
           call: () => {
-            groupedPlanesObject.centerRotateBottomPath[2].connectPlane.push(
-              groupedPlanesObject.rotateTrigger[0]
-            );
+            const connects = [
+              [
+                {
+                  groupName: "centerRotateBottomPath",
+                  index: 2
+                },
+                {
+                  groupName: "rotateTrigger",
+                  index: 0
+                }
+              ]
+            ];
+            this.generateAnimationConnect(connects);
           }
         },
         {
-          condition: { x: 1, z: 0 },
+          condition: { x: 0, z: -1 },
           call: () => {
-            groupedPlanesObject.centerRotateBottomPath[2].connectPlane.push(
-              groupedPlanesObject.rotateTrigger[0]
-            );
+            const connects = [
+              [
+                {
+                  groupName: "centerRotateBottomPath",
+                  index: 2
+                },
+                {
+                  groupName: "partTriangleOne",
+                  index: 2
+                }
+              ],
+              [
+                {
+                  groupName: "centerRotateTopPath",
+                  index: 3
+                },
+                {
+                  groupName: "partTriangleTWo",
+                  index: 3
+                }
+              ]
+            ];
+            // 这儿需要旋转后的判断
+            this.generateAnimationConnect(connects);
           }
         }
       ];
+
+      this.callbackByCondition(calls, relativeNormal);
     });
   }
 
@@ -397,7 +448,7 @@ export default class LevelOne {
     }[]
   ) {
     let material = new MeshLambertMaterial({
-      color: 0x000000,
+      color: 0x03a9f4,
       side: DoubleSide
     });
     const groupedPlanesObject = window.groupedPlanesObject;

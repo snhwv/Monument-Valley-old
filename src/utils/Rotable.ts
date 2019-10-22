@@ -54,7 +54,6 @@ export default class Rotable {
     this.rotateElement.updateMatrixWorld();
     this.plane.applyMatrix4(this.rotateElement.matrixWorld);
     this.plane.normal = this.planeNormal;
-    SpinControl(this);
   }
   // 为了旋转原点可改变，使用positionFactor来调整，因为有的旋转并不是以inGroup的中心作为原点旋转的
   changeOrigin(inGroup: Group,positionFactor: Vector3) {
