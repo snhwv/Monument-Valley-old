@@ -48,6 +48,7 @@ import Rotable from "@/utils/Rotable";
 import TWEEN from "@tweenjs/tween.js";
 import WalkPlane from "@/utils/WalkPlane";
 import { find } from "@/utils/DFS";
+import { createMGraph, MGraph, Floyd, PrintAll } from "@/utils/floyd";
 
 export default class LevelOne {
   mainMaterial = new MeshLambertMaterial({ color: 0x00ffff });
@@ -139,8 +140,7 @@ export default class LevelOne {
         graph[i][indexOfNodes] = 1;
       });
     }
-
-    console.log(graph)
+    return graph;
   }
 
   stairRotableBindCall() {
@@ -206,6 +206,10 @@ export default class LevelOne {
             this.generateAnimationConnect(connects);
 
             this.generateMGraph();
+            const g = new MGraph(window.nodes.length);
+            createMGraph(this.generateMGraph(),g);
+            Floyd(g);
+            PrintAll(g);
             // const path = main();
           }
         }
