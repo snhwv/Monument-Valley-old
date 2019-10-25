@@ -6,7 +6,8 @@ import {
   composeObjectWidthMultiply,
   walkPlaneCreator,
   getBox,
-  listenPlanes
+  listenPlanes,
+  IUserData
 } from "@/utils";
 import {
   BoxGeometry,
@@ -115,6 +116,7 @@ export default class LevelOne {
     this.stairRotable = stairRotable;
 
     this.changeNodesDataStruct();
+    this.bindPathPointCallback();
 
     const spinControl = new SpinControl();
     spinControl.add(centerRotable);
@@ -138,14 +140,21 @@ export default class LevelOne {
 
     const quat = new Quaternion();
     const scale = new Vector3();
-    
-    plane.updateWorldMatrix(true,false)
-    plane.getWorldPosition(initPosition)
 
-    const ada = new Ada(initPosition);
+    const ada = new Ada();
     scene.add(ada.element);
     this.ada = ada;
     initPlaneData.hasAda = true;
+
+    const hasAdaData: IUserData = window.nodes.find(node => node.hasAda);
+    if (hasAdaData) {
+      ada.hasAdaPlane = hasAdaData.plane;
+    }
+
+    // ada.addTo(plane)
+    plane.localToWorld(ada.element.position);
+    plane.localToWorld(ada.position);
+    scene.add(ada.element);
   }
   stairRotableBindCall() {
     const stairRotable = this.stairRotable;
@@ -260,8 +269,6 @@ export default class LevelOne {
         .localToWorld(axis.x.clone())
         .sub(centerRotable.element.position)
         .round();
-      console.log("relativeNormal", relativeNormal);
-      console.log("nodes", window.groupedPlanesObject);
 
       const calls = [
         {
@@ -352,7 +359,23 @@ export default class LevelOne {
       this.callbackByCondition(calls, relativeNormal);
     });
   }
-
+  bindPathPointCallback() {
+    const groupedPlanesObject = window.groupedPlanesObject;
+    console.log(groupedPlanesObject)
+    groupedPlanesObject.rotateTrigger[0].callback = function() {
+      if(this.called){
+        return;
+      }
+      debugger;
+      groupedPlanesObject.partTriangleOne[0].connectPlane.push(
+        groupedPlanesObject.partTriangleTWo[0]
+      );
+      groupedPlanesObject.partTriangleTWo[0].connectPlane.push(
+        groupedPlanesObject.partTriangleOne[0]
+      );
+      this.called = true;
+    };
+  }
   changeNodesDataStruct() {
     const nodes = window.nodes;
     const obj: {

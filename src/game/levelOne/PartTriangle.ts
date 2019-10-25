@@ -132,6 +132,9 @@ export default class PartTriangle {
     groupOne.translateZ(unitLength);
     this.groupTwo = groupTwo;
     this.generateCover();
+    console.log()
+    const coverPosition = camera.position.clone().multiplyScalar(0.6);
+    groupTwo.children[0].children[0].position.add(coverPosition)
     this.element.add(groupTwo);
     this.element.add(groupOne);
   }

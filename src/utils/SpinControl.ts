@@ -30,13 +30,14 @@ export class SpinControl {
     this.rotables.push(object);
   }
 
-  mousedown(e: any) {
+  onMousedown(e: any) {
+    
     e.preventDefault();
     if (!this.spinEnabled) {
       return;
     }
     let mouse = new Vector2();
-
+    
     if (!(e.clientX || (e.touches && e.touches.length && e.touches[0].pageX))) {
       return;
     }
@@ -160,7 +161,7 @@ export class SpinControl {
     renderer.domElement.addEventListener(
       "mousedown",
       e => {
-        this.mousedown(e);
+        this.onMousedown(e);
       },
       false
     );
@@ -168,7 +169,7 @@ export class SpinControl {
       "touchstart",
       e => {
         if (e.touches.length) {
-          this.mousedown(e);
+          this.onMousedown(e);
         }
       },
       false

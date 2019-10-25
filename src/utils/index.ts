@@ -18,6 +18,18 @@ import { renderer, camera, scene } from "@/game/base";
 import { createMGraph, Floyd, PrintAll, MGraph, getPath } from "./floyd";
 import { levelOne } from "@/game";
 
+export interface IUserData {
+  belongGroup: string;
+  connectPlane: Mesh[];
+  hasAda: boolean;
+  index: number;
+  normal: Vector3;
+  plane: Mesh;
+  uuid: string;
+  callback?: ()=>void;
+  called?: boolean;
+}
+
 export function squarePositionGenerator(
   center: Vector2 = new Vector2(),
   edgeCubeNum: number = 5,
@@ -133,7 +145,10 @@ export function walkPlaneCreator(width: number, height: number) {
 
 export function listenPlanes() {
   const nodes = window.nodes;
-  const planes = nodes.map(item => item.plane);
+  const planes:Mesh[] = nodes.map(item => {
+    (item.plane as Mesh).updateWorldMatrix(true,false);
+    return item.plane;
+  });
   renderer.domElement.addEventListener(
     "mousedown",
     e => {
@@ -173,27 +188,33 @@ function mousedown(planes: Mesh[], e: any) {
   if (result.length) {
     if (planes.includes(result[0].object as Mesh)) {
       const plane = result[0].object as Mesh;
-      plane.material = material;
-      const G = new MGraph(window.nodes.length);
-      createMGraph(generateMGraph(), G);
-      Floyd(G);
-      const hasAdaPlane = planes.find(plane => {
-        return plane.userData.hasAda;
-      });
-      let adaMaterial = new MeshLambertMaterial({
-        color: 0xff0000,
-        side: DoubleSide
-      });
-      (hasAdaPlane as Mesh).material = adaMaterial;
-      const path = getPath(
-        planes.indexOf(hasAdaPlane as Mesh),
-        planes.indexOf(plane)
-      );
-      if (path.weight < 9999) {
-        levelOne.ada.element.position.set(0, 0, 0);
-        console.log("from", hasAdaPlane);
-        console.log("target", plane);
-        console.log("path", path);
+      if (!plane.userData.hasAda) {
+        plane.material = material;
+        const G = new MGraph(window.nodes.length);
+        createMGraph(generateMGraph(), G);
+        Floyd(G);
+        const hasAdaPlane = planes.find(plane => {
+          return plane.userData.hasAda;
+        });
+        let adaMaterial = new MeshLambertMaterial({
+          color: 0xff0000,
+          side: DoubleSide
+        });
+        (hasAdaPlane as Mesh).material = adaMaterial;
+        const path = getPath(
+          planes.indexOf(hasAdaPlane as Mesh),
+          planes.indexOf(plane)
+        );
+        if (path.weight < 9999) {
+          console.log("path", path);
+          const pathPlanes: IUserData[] = [];
+          const nodes = window.nodes;
+          path.path.map(item => {
+            pathPlanes.push(nodes[item]);
+          });
+          window.path = pathPlanes;
+          levelOne.ada.move();
+        }
       }
     }
   }
