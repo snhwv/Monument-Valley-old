@@ -97,7 +97,7 @@ export default class LevelOne {
     rotableGroup.add(valve);
     rotableGroup.add(rotableStair);
     const stairRotable = new Rotable(rotableGroup, valve, new Vector3(0, 0, 1));
-    stairRotable.element.rotateOnAxis(axis.z, Math.PI);
+    // stairRotable.element.rotateOnAxis(axis.z, Math.PI);
     const boxdata = getBox(centerRotate.element);
 
     // 这是中间可旋转部分的box中心，相对于原点，所以使用这个中心vector3校准旋转中心
@@ -134,7 +134,7 @@ export default class LevelOne {
 
   generateAda() {
     const groupedPlanesObject = window.groupedPlanesObject;
-    const initPlaneData = groupedPlanesObject.bottomPath[0];
+    const initPlaneData = groupedPlanesObject.staticStairWay[4];
     const initPosition = new Vector3();
     const plane = initPlaneData.plane as Mesh;
 
@@ -361,12 +361,12 @@ export default class LevelOne {
   }
   bindPathPointCallback() {
     const groupedPlanesObject = window.groupedPlanesObject;
-    console.log(groupedPlanesObject)
-    groupedPlanesObject.rotateTrigger[0].callback = function() {
+    console.log(groupedPlanesObject);
+    (groupedPlanesObject.rotateTrigger[0] as IUserData).callback = function(tween,ada) {
       if(this.called){
         return;
       }
-      debugger;
+      // debugger;
       groupedPlanesObject.partTriangleOne[0].connectPlane.push(
         groupedPlanesObject.partTriangleTWo[0]
       );
@@ -374,6 +374,10 @@ export default class LevelOne {
         groupedPlanesObject.partTriangleOne[0]
       );
       this.called = true;
+      if(ada) {
+        ada.isMoving = false;
+        ada.path = [];
+      }
     };
   }
   changeNodesDataStruct() {
@@ -536,6 +540,7 @@ export default class LevelOne {
         plane.rotateOnAxis(axis.x, Math.PI / 2);
         plane.translateZ(-(2 / 2 + 0.01));
         plane.userData.belongGroup = "bottomPath";
+        plane.userData.type = 'normal';
         plane.userData.index = index;
         index++;
         cube.add(plane);
@@ -554,6 +559,7 @@ export default class LevelOne {
     const stairway = new Stairway(stairSize, false);
     stairway.walkPlanes.map((item, index) => {
       item.userData.belongGroup = "rotateStairWay";
+      item.userData.type = 'stair';
       item.userData.index = index;
     });
     const stairwayGroup = stairway.element;
@@ -596,6 +602,7 @@ export default class LevelOne {
       if (!i) {
         const plane = walkPlaneCreator(unitLength, unitLength);
         plane.userData.belongGroup = "staticStairWay";
+        plane.userData.type = 'normal';
         plane.userData.index = 1;
         composeObject(
           plane,
@@ -610,6 +617,7 @@ export default class LevelOne {
     const smallStairway = new Stairway(1, false);
     smallStairway.walkPlanes.map((item, index) => {
       item.userData.belongGroup = "staticStairWay";
+      item.userData.type = 'stair';
       item.userData.index = index;
     });
     const smallStairwayGroup = smallStairway.element;
@@ -620,6 +628,7 @@ export default class LevelOne {
     const largeStairway = new Stairway(2, false);
     largeStairway.walkPlanes.reverse().map((item, index) => {
       item.userData.belongGroup = "staticStairWay";
+      item.userData.type = 'stair';
       item.userData.index = index + 2;
     });
     const largeStairwayGroup = largeStairway.element;
@@ -650,6 +659,7 @@ export default class LevelOne {
 
     const plane = walkPlaneCreator(unitLength, unitLength);
     plane.userData.belongGroup = "staticStairWay";
+    plane.userData.type = 'normal';
     plane.userData.index = 4;
     composeObject(
       plane,
@@ -687,6 +697,7 @@ export default class LevelOne {
 
     const plane = walkPlaneCreator(unitLength, unitLength);
     plane.userData.belongGroup = "enterPointOne";
+    plane.userData.type = 'normal';
     plane.userData.index = 0;
     composeObject(
       plane,

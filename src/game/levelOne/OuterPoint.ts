@@ -137,6 +137,7 @@ export default class OuterPoint {
 
     const plane = walkPlaneCreator(unitLength, unitLength);
     plane.userData.belongGroup = "outPointOne";
+    plane.userData.type = 'normal';
     plane.userData.index = 0;
     composeObject(
       plane,
@@ -155,6 +156,7 @@ export default class OuterPoint {
 
     const plane = walkPlaneCreator(unitLength, unitLength);
     plane.userData.belongGroup = "rotateTrigger";
+    plane.userData.type = 'normal';
     plane.userData.index = 0;
     composeObject(
       plane,

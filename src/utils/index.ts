@@ -17,6 +17,7 @@ import { axis } from "@/constents";
 import { renderer, camera, scene } from "@/game/base";
 import { createMGraph, Floyd, PrintAll, MGraph, getPath } from "./floyd";
 import { levelOne } from "@/game";
+import Ada from "./ada";
 
 export interface IUserData {
   belongGroup: string;
@@ -26,7 +27,7 @@ export interface IUserData {
   normal: Vector3;
   plane: Mesh;
   uuid: string;
-  callback?: ()=>void;
+  callback?: (tween?: TWEEN.Tween,ada?: Ada)=>void;
   called?: boolean;
 }
 

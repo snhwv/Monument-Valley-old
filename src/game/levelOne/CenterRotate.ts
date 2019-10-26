@@ -139,6 +139,7 @@ export default class CenterRotate {
 
     const plane = walkPlaneCreator(unitLength, unitLength);
     plane.userData.belongGroup = 'centerRotateTopPath';
+    plane.userData.type = 'normal';
     plane.userData.index = 0;
       composeObject(
         plane,
@@ -166,6 +167,7 @@ export default class CenterRotate {
 
       const plane = walkPlaneCreator(unitLength, unitLength);
       plane.userData.belongGroup = 'centerRotateBottomPath';
+      plane.userData.type = 'normal';
       plane.userData.index = i;
       // if(i === 2) {
       //   plane.userData.isConnectPoint = true;
@@ -186,6 +188,7 @@ export default class CenterRotate {
       cloneMesh.translateZ(i * unitLength);
       const plane = walkPlaneCreator(unitLength, unitLength);
       plane.userData.belongGroup = 'centerRotateTopPath';
+      plane.userData.type = 'normal';
       plane.userData.index = i + 1;
       composeObject(
         plane,

@@ -57,6 +57,7 @@ export default class PartTriangle {
 
     const plane = walkPlaneCreator(unitLength, unitLength);
     plane.userData.belongGroup = "partTriangleTWo";
+    plane.userData.type = 'normal';
     plane.userData.index = 0;
     composeObject(
       plane,
@@ -93,6 +94,7 @@ export default class PartTriangle {
 
       const plane = walkPlaneCreator(unitLength, unitLength);
       plane.userData.belongGroup = "partTriangleTWo";
+      plane.userData.type = 'normal';
 
       if (i < 2) {
         this.coverCubes.push(cloneMesh);
@@ -118,6 +120,7 @@ export default class PartTriangle {
       const plane = walkPlaneCreator(unitLength, unitLength);
 
       plane.userData.belongGroup = "partTriangleOne";
+      plane.userData.type = 'normal';
       plane.userData.index = i;
       composeObject(
         plane,
