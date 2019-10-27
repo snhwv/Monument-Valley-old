@@ -26,7 +26,7 @@ import {
   OctahedronGeometry,
   BoxGeometry
 } from "three";
-import { axis, unitLength } from "@/constents";
+import { axis, unitLength, mainMaterial } from "@/constents";
 import { subtract, intersect, union } from "@/utils/bsp";
 import Door from "@/components/door";
 import HollowHolder from "@/components/hollowHolder";
@@ -52,7 +52,7 @@ export default class PartTriangle {
 
   generateRelativeCube() {
     let geometry = new BoxGeometry(unitLength, unitLength, unitLength);
-    let material = new MeshLambertMaterial({ color: 0x00ff00 });
+    let material = mainMaterial;
     const cube = new Mesh(geometry, material);
 
     const plane = walkPlaneCreator(unitLength, unitLength);
@@ -85,7 +85,7 @@ export default class PartTriangle {
     // 路径上的第一个边
     const groupOne = new Group();
     let geometry = new BoxGeometry(unitLength, unitLength, unitLength);
-    let material = new MeshLambertMaterial({ color: 0x00ff00 });
+    let material = mainMaterial;
 
     const mesh = new Mesh(geometry, material);
     for (let i = 0; i < 3; i++) {

@@ -27,7 +27,9 @@ export class SpinControl {
 
   rotables: Rotable[] = [];
   add(object: Rotable) {
-    this.rotables.push(object);
+    if(this.rotables.indexOf(object) === -1) {
+      this.rotables.push(object);
+    }
   }
 
   onMousedown(e: any) {

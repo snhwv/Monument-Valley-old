@@ -1,4 +1,5 @@
 declare module "three/examples/js/controls/OrbitControls";
+declare module "three/examples/jsm/libs/dat.gui.module.js";
 
 interface Window {
   THREE: any;

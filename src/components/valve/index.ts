@@ -9,7 +9,8 @@ import THREE, {
   BufferGeometry,
   Matrix4,
   Plane,
-  ArrowHelper
+  ArrowHelper,
+  CylinderGeometry
 } from "three";
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils";
 import {
@@ -18,6 +19,7 @@ import {
   getQuaternionFromAxisAndAngle
 } from "@/utils";
 import { axis } from "@/constents";
+import TWEEN from "@tweenjs/tween.js";
 
 export default class Valve {
   element: Group = new Group();
@@ -43,7 +45,6 @@ export default class Valve {
     const rod = this.generateRod();
     this.element.add(plug);
     this.element.add(rod);
-    // this.initRotation();
   }
 
   // 中间的阀塞
@@ -59,6 +60,9 @@ export default class Valve {
     return cylinder;
   }
   // 阀杆
+  verticalCylinder!: Mesh;
+  horizontalCylinder!: Mesh;
+  endGeometry!: BufferGeometry;
   generateRod() {
     var rod = new Group();
     var geometry = new CylinderBufferGeometry(
@@ -69,7 +73,7 @@ export default class Valve {
     );
     var material = new MeshLambertMaterial({ color: 0xffff00 });
     const verticalGeo = geometry.clone();
-    // geo采用矩阵变换后，mesh就不需要变换了，使用矩阵变换不影响position,rotation等属性
+    // geo采用矩阵变换后，mesh就不需要变换了，使用geo矩阵变换不影响position,rotation等属性
     composeObject(
       verticalGeo,
       new Vector3(),
@@ -84,7 +88,8 @@ export default class Valve {
       getQuaternionFromAxisAndAngle(axis.z.normalize(), Math.PI / 2)
     );
     var horizontalCylinder = new Mesh(horizontalGeo, material);
-
+    this.verticalCylinder = verticalCylinder;
+    this.horizontalCylinder = horizontalCylinder;
     rod.add(verticalCylinder);
     rod.add(horizontalCylinder);
 
@@ -94,38 +99,78 @@ export default class Valve {
       this.rodEndWidth,
       32
     );
-
+    this.endGeometry = endGeometry;
     var endMaterial = new MeshLambertMaterial({ color: 0xffff00 });
     var endCylinder = new Mesh(endGeometry, endMaterial);
 
-    // endCylinder.translateX(this.rodWidth - this.rodEndWidth / 2);
-    // endCylinder.rotateOnAxis(axis.z, Math.PI / 2);
     composeObject(
       endCylinder,
       new Vector3(this.rodWidth - this.rodEndWidth / 2, 0, 0),
       getQuaternionFromAxisAndAngle(axis.z, Math.PI / 2)
     );
-
     for (let i = 0; i < 4; i++) {
       const mesh = endCylinder.clone();
       composeObject(
-        endCylinder,
+        mesh,
         new Vector3(0, 0, 0),
         getQuaternionFromAxisAndAngle(axis.y, (Math.PI / 2) * i)
       );
       rod.add(mesh);
     }
-    rod.add(endCylinder);
+    // rod.add(endCylinder);
     return rod;
   }
-  initRotation() {
-    // this.planeNormal = axis.y.clone();
-    // const distance = 0;
-    // this.plane = new Plane(this.planeNormal, distance);
+
+  isHide = false;
+  isShow = true;
+  ratio = 0.26;
+  hide() {
+    if (this.isHide || !this.isShow) {
+      return;
+    }
+    const mutation = { x: 1 };
+    let moveDistence = this.rodWidth;
+    this.isHide = true;
+    this.isShow = false;
+    const tween = new TWEEN.Tween(mutation)
+      .to({ x: this.ratio }, 220)
+      .easing(TWEEN.Easing.Back.Out)
+      .onUpdate(() => {
+        this.verticalCylinder.scale.set(1, 1, mutation.x);
+        this.horizontalCylinder.scale.set(mutation.x, 1, 1);
+
+        this.endGeometry.translate(
+          0,
+          moveDistence - this.rodWidth * mutation.x,
+          0
+        );
+        moveDistence = this.rodWidth * mutation.x;
+      });
+    tween.start();
   }
-  updatePlane() {
-    // const valveGroup = this.element;
-    // valveGroup.updateMatrixWorld();
-    // this.plane.applyMatrix4(valveGroup.matrixWorld);
+
+  show() {
+    if (this.isShow || !this.isHide) {
+      return;
+    }
+    const mutation = { x: 1 };
+    let moveDistence = this.rodWidth;
+    this.isShow = true;
+    this.isHide = false;
+    const tween = new TWEEN.Tween(mutation)
+      .to({ x: this.ratio }, 220)
+      .easing(TWEEN.Easing.Back.Out)
+      .onUpdate(() => {
+        this.verticalCylinder.scale.set(1, 1,1 + this.ratio - mutation.x);
+        this.horizontalCylinder.scale.set( 1 + this.ratio - mutation.x, 1, 1);
+
+        this.endGeometry.translate(
+          0,
+          -(moveDistence - this.rodWidth * mutation.x),
+          0
+        );
+        moveDistence = this.rodWidth * mutation.x;
+      });
+    tween.start();
   }
 }

@@ -24,7 +24,7 @@ import {
   OctahedronGeometry,
   BoxGeometry
 } from "three";
-import { axis, unitLength } from "@/constents";
+import { axis, unitLength, mainMaterial } from "@/constents";
 import { subtract, intersect, union } from "@/utils/bsp";
 import Door from "@/components/door";
 import HollowHolder from "@/components/hollowHolder";
@@ -62,7 +62,7 @@ export default class OuterPoint {
     const mainZ = 3 * unitLength;
     this.bottomMainGeo = new BoxGeometry(mainX, this.height, mainZ);
 
-    const material = new MeshLambertMaterial({ color: 0x00ffff });
+    // const material = new MeshLambertMaterial({ color: 0x00ffff });
 
     const subGeo = new BoxGeometry(
       2 * unitLength - this.doorEdge,
@@ -110,7 +110,7 @@ export default class OuterPoint {
       0
     );
 
-    const mesh = new Mesh(this.bottomMainGeo, material);
+    const mesh = new Mesh(this.bottomMainGeo, mainMaterial);
     this.element.add(mesh);
   }
   generateMiddle() {
@@ -118,7 +118,7 @@ export default class OuterPoint {
     const mainZ = 3 * unitLength;
     let middleGeo = new BoxGeometry(mainX, this.height, mainZ);
 
-    const material = new MeshLambertMaterial({ color: 0x00ffff });
+    // const material = new MeshLambertMaterial({ color: 0x00ffff });
 
     const doorDeep = 20;
     const doorEdge = 3;
@@ -133,7 +133,7 @@ export default class OuterPoint {
       getQuaternionFromAxisAndAngle(axis.y, Math.PI / 2)
     );
     middleGeo = subtract(middleGeo, doorGeo);
-    const mesh = new Mesh(middleGeo, material);
+    const mesh = new Mesh(middleGeo, mainMaterial);
 
     const plane = walkPlaneCreator(unitLength, unitLength);
     plane.userData.belongGroup = "outPointOne";

@@ -17,14 +17,14 @@ import {
   OctahedronBufferGeometry,
   OctahedronGeometry
 } from "three";
-import { axis, unitLength } from "@/constents";
+import { axis, unitLength, mainMaterial } from "@/constents";
 import { subtract, intersect, union } from "@/utils/bsp";
 
 export default class Roof {
   element: Group = new Group();
 
   size = 1;
-  material = new MeshLambertMaterial({ color: 0x00ffff });
+  // material = new MeshLambertMaterial({ color: 0x00ffff });
   hatHeight = 28;
   constructor(size: number = 1) {
     this.size = size;
@@ -49,14 +49,14 @@ export default class Roof {
   }
   generateOctahedron(size: number) {
     var geometry = new OctahedronGeometry(size);
-    var octahedron = new Mesh(geometry, this.material);
+    var octahedron = new Mesh(geometry, mainMaterial);
     return octahedron;
   }
   generatePedestal() {
     const thickness = 1;
     var geometry = new BoxBufferGeometry(unitLength + 4, thickness, unitLength + 4);
 
-    var cube = new Mesh(geometry, this.material);
+    var cube = new Mesh(geometry, mainMaterial);
     cube.translateY(thickness / 2);
     
     this.element.add(cube);
@@ -98,7 +98,7 @@ export default class Roof {
       getQuaternionFromAxisAndAngle(axis.y, 0)
     );
     const result = intersect(verticalGeometry, horizontalGeometry);
-    const mesh = new Mesh(result, this.material);
+    const mesh = new Mesh(result, mainMaterial);
     
     this.element.add(mesh);
   }

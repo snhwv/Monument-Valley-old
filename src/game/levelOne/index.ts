@@ -24,14 +24,16 @@ import {
   Matrix4,
   PlaneGeometry,
   Box3,
-  DoubleSide
+  DoubleSide,
+  TextureLoader,
+  ImageUtils
 } from "three";
 import * as THREE from "three";
 import { scene, camera, renderer } from "../base";
 import { squarePositionGenerator } from "@/utils";
 import Valve from "@/components/valve";
 import Stairway from "@/components/stairway";
-import { axis, unitLength } from "@/constents";
+import { axis, unitLength, mainMaterial } from "@/constents";
 import {
   QuarterCirclePathOuter,
   CirclePathInner
@@ -52,15 +54,15 @@ import { SpinControl } from "@/utils/SpinControl";
 import Ada from "@/utils/ada";
 
 export default class LevelOne {
-  mainMaterial = new MeshLambertMaterial({ color: 0x00ffff });
   centerCube!: Mesh;
   centerCubeWidth: number = 5 * unitLength;
   centerCubeHeight: number = 6 * unitLength;
   rotableStair!: Stairway;
   topHollowHolder!: HollowHolder;
-  valve!: Group;
+  valve!: Valve;
   centerRotable!: Rotable;
   stairRotable!: Rotable;
+  spinControl!: SpinControl;
   ada!: Ada;
   constructor() {
     this.init();
@@ -98,6 +100,8 @@ export default class LevelOne {
     rotableGroup.add(rotableStair);
     const stairRotable = new Rotable(rotableGroup, valve, new Vector3(0, 0, 1));
     // stairRotable.element.rotateOnAxis(axis.z, Math.PI);
+
+    console.log(stairRotable);
     const boxdata = getBox(centerRotate.element);
 
     // 这是中间可旋转部分的box中心，相对于原点，所以使用这个中心vector3校准旋转中心
@@ -122,6 +126,7 @@ export default class LevelOne {
     spinControl.add(centerRotable);
     spinControl.add(stairRotable);
     spinControl.listen();
+    this.spinControl = spinControl;
     const groupedPlanesObject = window.groupedPlanesObject;
     // find(groupedPlanesObject.bottomPath[0],groupedPlanesObject.bottomPath[3]);
     this.centerRotationBindCall();
@@ -362,8 +367,12 @@ export default class LevelOne {
   bindPathPointCallback() {
     const groupedPlanesObject = window.groupedPlanesObject;
     console.log(groupedPlanesObject);
-    (groupedPlanesObject.rotateTrigger[0] as IUserData).callback = function(tween,ada) {
-      if(this.called){
+
+    (groupedPlanesObject.rotateTrigger[0] as IUserData).callback = function(
+      tween,
+      ada
+    ) {
+      if (this.called) {
         return;
       }
       // debugger;
@@ -374,10 +383,44 @@ export default class LevelOne {
         groupedPlanesObject.partTriangleOne[0]
       );
       this.called = true;
-      if(ada) {
+      if (ada) {
         ada.isMoving = false;
         ada.path = [];
       }
+    };
+
+    (groupedPlanesObject.rotateStairWay[0] as IUserData).callback = () => {
+      console.log("call rotateStairWay");
+      const stairRotable = this.stairRotable;
+      const rotables = this.spinControl.rotables;
+      if (rotables.indexOf(stairRotable) !== -1) {
+        rotables.splice(rotables.indexOf(stairRotable), 1);
+      }
+      this.valve.hide();
+    };
+
+    (groupedPlanesObject.rotateStairWay[2] as IUserData).callback = () => {
+      console.log("call rotateStairWay");
+      const stairRotable = this.stairRotable;
+      const rotables = this.spinControl.rotables;
+      if (rotables.indexOf(stairRotable) !== -1) {
+        rotables.splice(rotables.indexOf(stairRotable), 1);
+      }
+      this.valve.hide();
+    };
+
+    (groupedPlanesObject.staticStairWay[0] as IUserData).callback = () => {
+      console.log("call staticStairWay");
+      const stairRotable = this.stairRotable;
+      this.spinControl.add(stairRotable);
+      this.valve.show();
+    };
+
+    (groupedPlanesObject.bottomPath[3] as IUserData).callback = () => {
+      console.log("call bottomPath");
+      const stairRotable = this.stairRotable;
+      this.spinControl.add(stairRotable);
+      this.valve.show();
     };
   }
   changeNodesDataStruct() {
@@ -497,7 +540,7 @@ export default class LevelOne {
       this.centerCubeHeight,
       this.centerCubeWidth
     );
-    let centerCube = new Mesh(centerCubeGeo, this.mainMaterial);
+    let centerCube = new Mesh(centerCubeGeo, mainMaterial);
     centerCube.position.sub(
       new Vector3(
         0,
@@ -505,16 +548,38 @@ export default class LevelOne {
         0
       )
     );
-    this.centerCube = new Mesh(centerCubeGeo, this.mainMaterial);
+    this.centerCube = new Mesh(centerCubeGeo, mainMaterial);
     return centerCube;
   }
 
   generateBottomLoopCube() {
     let geometry = new BoxGeometry(unitLength, unitLength, unitLength);
 
-    let material = new MeshLambertMaterial({ color: 0xffff00 });
+    // let material = new MeshLambertMaterial({ color: 0xffff00 });
     const loop = new Group();
     const positions = squarePositionGenerator(new Vector2(), 5, unitLength);
+
+    var loader = new TextureLoader();
+    var clothTexture = loader.load("/images/sprite0.png");
+    clothTexture.anisotropy = 16;
+
+    // var clothMaterial = new MeshLambertMaterial({
+    //   map: clothTexture,
+    //   side: DoubleSide,
+    //   alphaTest: 0.5
+    // });
+
+    const material = mainMaterial.clone();
+    material.map = clothTexture;
+    material.alphaTest = 0.5;
+    // const loader = new TextureLoader();
+    // // const texture = ImageUtils.loadTexture();
+    // // material.map = texture;
+    // loader.load('/images/sprite0.png',(texture) => {
+    //   material.map = texture;
+    //   material.needsUpdate = true;
+    //   console.log(texture)
+    // });
     for (let i = 0; i < positions.length; i++) {
       let cube = new Mesh(geometry, material);
 
@@ -527,7 +592,6 @@ export default class LevelOne {
 
   generatePlanePath() {
     let geometry = new BoxGeometry(unitLength, 2, unitLength);
-    let material = new MeshLambertMaterial({ color: 0x00ff00 });
     const loop = new Group();
     const positions = squarePositionGenerator(new Vector2(), 7, unitLength);
 
@@ -535,12 +599,12 @@ export default class LevelOne {
     for (let i = 0; i < positions.length; i++) {
       const position = positions[i];
       if (position.x > 0 && position.y > unitLength) {
-        let cube = new Mesh(geometry, material);
+        let cube = new Mesh(geometry, mainMaterial);
         const plane = walkPlaneCreator(unitLength, unitLength);
         plane.rotateOnAxis(axis.x, Math.PI / 2);
         plane.translateZ(-(2 / 2 + 0.01));
         plane.userData.belongGroup = "bottomPath";
-        plane.userData.type = 'normal';
+        plane.userData.type = "normal";
         plane.userData.index = index;
         index++;
         cube.add(plane);
@@ -559,7 +623,7 @@ export default class LevelOne {
     const stairway = new Stairway(stairSize, false);
     stairway.walkPlanes.map((item, index) => {
       item.userData.belongGroup = "rotateStairWay";
-      item.userData.type = 'stair';
+      item.userData.type = "stair";
       item.userData.index = index;
     });
     const stairwayGroup = stairway.element;
@@ -581,8 +645,7 @@ export default class LevelOne {
     valveGroup.position.add(this.rotableStair.element.position);
     valveGroup.translateZ(this.rotableStair.depth / 2 + valve.plugWidth / 2);
     valveGroup.rotateOnAxis(axis.x, Math.PI / 2);
-    valve.updatePlane();
-
+    this.valve = valve;
     return valveGroup;
   }
 
@@ -594,7 +657,7 @@ export default class LevelOne {
       this.centerCubeWidth / 2 + unitLength / 2
     );
     var geometry = new BoxBufferGeometry(unitLength, unitLength, unitLength);
-    var cube = new Mesh(geometry, this.mainMaterial);
+    var cube = new Mesh(geometry, mainMaterial);
     for (let i = 0; i < 3; i++) {
       const cloneCube = cube.clone();
       cloneCube.position.add(relativePosition);
@@ -602,7 +665,7 @@ export default class LevelOne {
       if (!i) {
         const plane = walkPlaneCreator(unitLength, unitLength);
         plane.userData.belongGroup = "staticStairWay";
-        plane.userData.type = 'normal';
+        plane.userData.type = "normal";
         plane.userData.index = 1;
         composeObject(
           plane,
@@ -617,7 +680,7 @@ export default class LevelOne {
     const smallStairway = new Stairway(1, false);
     smallStairway.walkPlanes.map((item, index) => {
       item.userData.belongGroup = "staticStairWay";
-      item.userData.type = 'stair';
+      item.userData.type = "stair";
       item.userData.index = index;
     });
     const smallStairwayGroup = smallStairway.element;
@@ -628,7 +691,7 @@ export default class LevelOne {
     const largeStairway = new Stairway(2, false);
     largeStairway.walkPlanes.reverse().map((item, index) => {
       item.userData.belongGroup = "staticStairWay";
-      item.userData.type = 'stair';
+      item.userData.type = "stair";
       item.userData.index = index + 2;
     });
     const largeStairwayGroup = largeStairway.element;
@@ -659,7 +722,7 @@ export default class LevelOne {
 
     const plane = walkPlaneCreator(unitLength, unitLength);
     plane.userData.belongGroup = "staticStairWay";
-    plane.userData.type = 'normal';
+    plane.userData.type = "normal";
     plane.userData.index = 4;
     composeObject(
       plane,
@@ -687,7 +750,7 @@ export default class LevelOne {
     const topHollowHolderGroup = this.topHollowHolder.element;
 
     const geometry = new BoxBufferGeometry(unitLength, unitLength, unitLength);
-    const bottomCube = new Mesh(geometry, this.mainMaterial);
+    const bottomCube = new Mesh(geometry, mainMaterial);
     putTop(bottomCube, topHollowHolderGroup);
     const midCube = bottomCube.clone();
     midCube.position.set(0, 0, 0);
@@ -697,7 +760,7 @@ export default class LevelOne {
 
     const plane = walkPlaneCreator(unitLength, unitLength);
     plane.userData.belongGroup = "enterPointOne";
-    plane.userData.type = 'normal';
+    plane.userData.type = "normal";
     plane.userData.index = 0;
     composeObject(
       plane,

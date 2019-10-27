@@ -1,5 +1,6 @@
 import { Scene, OrthographicCamera, WebGLRenderer } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import {GUI} from "three/examples/jsm/libs/dat.gui.module.js";
 import TWEEN from "@tweenjs/tween.js";
 
 window.nodes = [];
@@ -17,6 +18,8 @@ camera = new OrthographicCamera(
   1,
   10000
 );
+
+export const dat = new GUI();
 //渲染器
 renderer = new WebGLRenderer({
   alpha: true,

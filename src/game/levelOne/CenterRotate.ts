@@ -25,7 +25,7 @@ import {
   OctahedronGeometry,
   BoxGeometry
 } from "three";
-import { axis, unitLength } from "@/constents";
+import { axis, unitLength, mainMaterial } from "@/constents";
 import { subtract, intersect, union } from "@/utils/bsp";
 import Door from "@/components/door";
 import HollowHolder from "@/components/hollowHolder";
@@ -65,7 +65,7 @@ export default class CenterRotate {
       this.cubeSize + 4,
       32
     );
-    var material = new MeshLambertMaterial({ color: 0xffff00 });
+    var material = mainMaterial;
     var cylinder = new Mesh(geometry, material);
 
     const loop = new Group();
@@ -105,7 +105,7 @@ export default class CenterRotate {
   generateLoopCube() {
     const edgeWidth = this.sizeWidth * this.cubeSize;
     let geometry = new BoxGeometry(edgeWidth, this.cubeSize, edgeWidth);
-    let material = new MeshLambertMaterial({ color: 0x00ff00 });
+    let material = mainMaterial;
     this.loopCube = new Mesh(geometry, material);
     this.rotateElement.add(this.loopCube);
     // this.element.add(this.loopCube);
@@ -113,7 +113,7 @@ export default class CenterRotate {
   generateOneTriangle() {
     const group = new Group();
     let geometry = new BoxGeometry(unitLength, unitLength * 8, unitLength);
-    let material = new MeshLambertMaterial({ color: 0x00ff00 });
+    let material = mainMaterial;
 
     const doorDeep = 15;
     const doorEdge = 8;
@@ -159,7 +159,7 @@ export default class CenterRotate {
     const bottomGroup = new Group();
     const topGroup = new Group();
     let geometry = new BoxGeometry(unitLength, unitLength, unitLength);
-    let material = new MeshLambertMaterial({ color: 0x00ff00 });
+    let material = mainMaterial;
     const mesh = new Mesh(geometry, material);
     for (let i = 0; i < 3; i++) {
       const cloneMesh = mesh.clone();

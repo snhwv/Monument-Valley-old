@@ -18,7 +18,7 @@ import {
   OctahedronGeometry,
   BoxGeometry
 } from "three";
-import { axis, unitLength } from "@/constents";
+import { axis, unitLength, mainMaterial } from "@/constents";
 import { subtract, intersect, union } from "@/utils/bsp";
 import Door from "../door";
 
@@ -46,7 +46,7 @@ export default class HollowHolder {
   generateShape() {
     const mainGeo = new BoxGeometry(unitLength, this.height, unitLength);
 
-    const material = new MeshLambertMaterial({ color: 0x00ffff });
+    // const material = new MeshLambertMaterial({ color: 0x00ffff });
 
     const doorGeo = this.door.getGeometry();
     const doorGeox = this.door.getGeometry().clone();
@@ -70,7 +70,7 @@ export default class HollowHolder {
       subtract(subtract(mainGeo, doorGeo), doorGeox),
       subGeo
     );
-    const mesh = new Mesh(resultx, material);
+    const mesh = new Mesh(resultx, mainMaterial);
     this.element.add(mesh);
   }
 }

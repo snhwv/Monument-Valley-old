@@ -57,7 +57,7 @@ export default class Ada {
 
     const cube = new Mesh(geo, material);
     this.element.add(cube);
-    this.element.lookAt(axis.z)
+    this.element.lookAt(axis.z);
   }
 
   project(planeMesh: Mesh, point: Vector3) {
@@ -138,17 +138,17 @@ export default class Ada {
           }
 
           const subVector = endPosition1.clone().sub(startPosition1);
-          const currentPosition = startPosition1.clone().add(
-            subVector.multiplyScalar(mutation.x)
-          );
+          const currentPosition = startPosition1
+            .clone()
+            .add(subVector.multiplyScalar(mutation.x));
           // if(nextPlane.userData.type !== 'stair') {
-            this.element.lookAt(endPosition1);
+          this.element.lookAt(endPosition1);
           // }
           this.element.position.copy(currentPosition);
         });
 
-        const startPosition2 = new Vector3();
-        const endPosition2 = new Vector3();
+      const startPosition2 = new Vector3();
+      const endPosition2 = new Vector3();
       startPosition2.copy(targetVector);
       nextPlane.getWorldPosition(endPosition2);
 
@@ -158,16 +158,16 @@ export default class Ada {
         .to({ x: 1 }, 500)
         .onUpdate(currentP => {
           if (!nextPlaneCallbackCalled) {
-            // nextPlaneCallbackCalled = true;
-            // if (nextPlane.userData.callback) {
-            //   nextPlane.userData.callback(tween1, this);
-            // }
+            nextPlaneCallbackCalled = true;
+            if (nextPlane.userData.callback) {
+              nextPlane.userData.callback(tween1, this);
+            }
           }
 
           const subVector = endPosition2.clone().sub(startPosition2);
-          const currentPosition = startPosition2.clone().add(
-            subVector.multiplyScalar(mutation1.x)
-          );
+          const currentPosition = startPosition2
+            .clone()
+            .add(subVector.multiplyScalar(mutation1.x));
           this.element.position.copy(currentPosition);
         })
         .onComplete(() => {
@@ -216,14 +216,14 @@ export default class Ada {
           }
 
           const subVector = endPosition1.clone().sub(startPosition1);
-          const currentPosition = startPosition1.clone().add(
-            subVector.multiplyScalar(mutation.x)
-          );
+          const currentPosition = startPosition1
+            .clone()
+            .add(subVector.multiplyScalar(mutation.x));
           this.element.position.copy(currentPosition);
         });
 
-        const startPosition2 = new Vector3();
-        const endPosition2 = new Vector3();
+      const startPosition2 = new Vector3();
+      const endPosition2 = new Vector3();
       startPosition2.copy(targetVector);
       nextPlane.getWorldPosition(endPosition2);
 
@@ -233,16 +233,16 @@ export default class Ada {
         .to({ x: 1 }, 500)
         .onUpdate(currentP => {
           if (!nextPlaneCallbackCalled) {
-            // nextPlaneCallbackCalled = true;
-            // if (hasAdaPlane.userData.callback) {
-            //   hasAdaPlane.userData.callback(tween1, this);
-            // }
+            nextPlaneCallbackCalled = true;
+            if (nextPlane.userData.callback) {
+              nextPlane.userData.callback(tween1, this);
+            }
           }
 
           const subVector = endPosition2.clone().sub(startPosition2);
-          const currentPosition = startPosition2.clone().add(
-            subVector.multiplyScalar(mutation1.x)
-          );
+          const currentPosition = startPosition2
+            .clone()
+            .add(subVector.multiplyScalar(mutation1.x));
           this.element.position.copy(currentPosition);
         })
         .onComplete(() => {
@@ -283,8 +283,6 @@ export default class Ada {
           }
         }
 
-       
-
         hasAdaPlane.getWorldPosition(startPosition);
         nextPlane.getWorldPosition(endPosition);
 
@@ -292,19 +290,28 @@ export default class Ada {
         const currentPosition = startPosition.add(
           subVector.multiplyScalar(mutation.x)
         );
-        
-        console.log(hasAdaPlane.uuid)
-        console.log(nextPlane)
-        
+
         this.element.position.copy(currentPosition);
-        if(nextPlane.userData.type !== 'stair') {
-          this.element.lookAt(endPosition);
+        if (nextPlane.userData.type !== "stair") {
+          // 上一个不是楼梯，下一个不是楼梯，设置lookat，（
+          // 上一个是楼梯的话不用设置lookat；上一个是平地，下一个是楼梯，上面代码已经设置了）
+          if (!this.element.position.equals(endPosition)) {
+            // 为解决lookat跳动的问题，跳动是因为物体还在旋转，
+            // onupdate设置完成时的物体与oncomplate的物体角度已经不一样了，所以直接在这儿就把ada加到下一个plane中去
+            this.element.lookAt(endPosition);
+          } else {
+            this.hasAdaPlane = nextPlane;
+            nextPlane.attach(this.element);
+            this._move();
+          }
         }
       })
       .onComplete(() => {
-        this.hasAdaPlane = nextPlane;
-        nextPlane.attach(this.element);
-        this._move();
+        if (nextPlane.userData.type === "stair") {
+          this.hasAdaPlane = nextPlane;
+          nextPlane.attach(this.element);
+          this._move();
+        }
       })
       .start();
   }

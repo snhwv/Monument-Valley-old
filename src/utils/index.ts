@@ -132,7 +132,9 @@ export function walkPlaneCreator(width: number, height: number) {
   let planeGeo = new PlaneGeometry(width, height);
   let material = new MeshLambertMaterial({
     color: 0xffff00,
-    side: DoubleSide
+    side: DoubleSide,
+    transparent: true,
+    opacity: 0,
   });
   const plane = new Mesh(planeGeo, material);
   plane.userData.normal = axis.z.clone();

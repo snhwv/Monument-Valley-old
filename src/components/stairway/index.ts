@@ -10,7 +10,7 @@ import {
   MeshPhongMaterial,
   Vector2
 } from "three";
-import { axis, unitLength } from "@/constents";
+import { axis, unitLength, mainMaterial } from "@/constents";
 import { walkPlaneCreator } from "@/utils";
 
 export default class Stairway {
@@ -66,7 +66,7 @@ export default class Stairway {
     var geometry = new ExtrudeGeometry(shape, extrudeSettings);
     const planes = this.generateWalkPlanes();
     this.walkPlanes = planes;
-    var mesh = new Mesh(geometry, new MeshPhongMaterial());
+    var mesh = new Mesh(geometry, mainMaterial);
     mesh.add(...planes);
     mesh.position.sub(
       new Vector3(
