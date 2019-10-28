@@ -25,7 +25,7 @@ import {
   OctahedronGeometry,
   BoxGeometry
 } from "three";
-import { axis, unitLength, mainMaterial } from "@/constents";
+import { axis, unitLength, mainMaterial, secendMaterial } from "@/constents";
 import { subtract, intersect, union } from "@/utils/bsp";
 import Door from "@/components/door";
 import HollowHolder from "@/components/hollowHolder";
@@ -34,7 +34,7 @@ export default class CenterRotate {
   element: Group = new Group();
 
   sizeWidth: number = 5;
-  cylinderR: number = 6;
+  cylinderR: number = 5;
   cubeSize = unitLength;
   positions!: Vector2[];
   loopCube!: Mesh;
@@ -62,10 +62,10 @@ export default class CenterRotate {
     var geometry = new CylinderBufferGeometry(
       this.cylinderR,
       this.cylinderR,
-      this.cubeSize + 4,
+      this.cubeSize + 6,
       32
     );
-    var material = mainMaterial;
+    var material = secendMaterial;
     var cylinder = new Mesh(geometry, material);
 
     const loop = new Group();
@@ -105,7 +105,7 @@ export default class CenterRotate {
   generateLoopCube() {
     const edgeWidth = this.sizeWidth * this.cubeSize;
     let geometry = new BoxGeometry(edgeWidth, this.cubeSize, edgeWidth);
-    let material = mainMaterial;
+    let material = secendMaterial;
     this.loopCube = new Mesh(geometry, material);
     this.rotateElement.add(this.loopCube);
     // this.element.add(this.loopCube);

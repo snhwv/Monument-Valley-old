@@ -559,9 +559,9 @@ export default class LevelOne {
     const loop = new Group();
     const positions = squarePositionGenerator(new Vector2(), 5, unitLength);
 
-    var loader = new TextureLoader();
-    var clothTexture = loader.load("/images/sprite0.png");
-    clothTexture.anisotropy = 16;
+    // var loader = new TextureLoader();
+    // var clothTexture = loader.load("/assets/sprite0.png");
+    // clothTexture.anisotropy = 16;
 
     // var clothMaterial = new MeshLambertMaterial({
     //   map: clothTexture,
@@ -569,9 +569,9 @@ export default class LevelOne {
     //   alphaTest: 0.5
     // });
 
-    const material = mainMaterial.clone();
-    material.map = clothTexture;
-    material.alphaTest = 0.5;
+    // const material = clothMaterial;
+    // material.map = clothTexture;
+    // material.alphaTest = 0.5;
     // const loader = new TextureLoader();
     // // const texture = ImageUtils.loadTexture();
     // // material.map = texture;
@@ -581,7 +581,7 @@ export default class LevelOne {
     //   console.log(texture)
     // });
     for (let i = 0; i < positions.length; i++) {
-      let cube = new Mesh(geometry, material);
+      let cube = new Mesh(geometry, mainMaterial);
 
       cube.position.set(positions[i].x, 0, positions[i].y);
       loop.add(cube);

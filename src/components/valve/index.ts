@@ -18,19 +18,19 @@ import {
   composeObject,
   getQuaternionFromAxisAndAngle
 } from "@/utils";
-import { axis } from "@/constents";
+import { axis, secendMaterial, mainMaterial } from "@/constents";
 import TWEEN from "@tweenjs/tween.js";
 
 export default class Valve {
   element: Group = new Group();
 
-  plugWidth = 12;
-  plugR = 5.2;
+  plugWidth = 14;
+  plugR = 7;
 
   rodWidth = 30;
-  rodR = 1.8;
-  rodEndWidth = 7;
-  rodEndR = 3;
+  rodR = 2.2;
+  rodEndWidth = 8;
+  rodEndR = 3.4;
 
   plane!: Plane;
   constructor() {
@@ -55,8 +55,7 @@ export default class Valve {
       this.plugWidth,
       32
     );
-    var material = new MeshLambertMaterial({ color: 0xffff00 });
-    var cylinder = new Mesh(geometry, material);
+    var cylinder = new Mesh(geometry, mainMaterial);
     return cylinder;
   }
   // 阀杆
@@ -71,7 +70,7 @@ export default class Valve {
       this.rodWidth * 2,
       32
     );
-    var material = new MeshLambertMaterial({ color: 0xffff00 });
+    // var material = new MeshLambertMaterial({ color: 0xffff00 });
     const verticalGeo = geometry.clone();
     // geo采用矩阵变换后，mesh就不需要变换了，使用geo矩阵变换不影响position,rotation等属性
     composeObject(
@@ -79,7 +78,7 @@ export default class Valve {
       new Vector3(),
       getQuaternionFromAxisAndAngle(axis.x.normalize(), Math.PI / 2)
     );
-    var verticalCylinder = new Mesh(verticalGeo, material);
+    var verticalCylinder = new Mesh(verticalGeo, secendMaterial);
 
     const horizontalGeo = geometry.clone();
     composeObject(
@@ -87,7 +86,7 @@ export default class Valve {
       new Vector3(),
       getQuaternionFromAxisAndAngle(axis.z.normalize(), Math.PI / 2)
     );
-    var horizontalCylinder = new Mesh(horizontalGeo, material);
+    var horizontalCylinder = new Mesh(horizontalGeo, secendMaterial);
     this.verticalCylinder = verticalCylinder;
     this.horizontalCylinder = horizontalCylinder;
     rod.add(verticalCylinder);
@@ -100,8 +99,8 @@ export default class Valve {
       32
     );
     this.endGeometry = endGeometry;
-    var endMaterial = new MeshLambertMaterial({ color: 0xffff00 });
-    var endCylinder = new Mesh(endGeometry, endMaterial);
+    // var endMaterial = new MeshLambertMaterial({ color: 0xffff00 });
+    var endCylinder = new Mesh(endGeometry, secendMaterial);
 
     composeObject(
       endCylinder,
@@ -123,7 +122,7 @@ export default class Valve {
 
   isHide = false;
   isShow = true;
-  ratio = 0.26;
+  ratio = 0.33;
   hide() {
     if (this.isHide || !this.isShow) {
       return;

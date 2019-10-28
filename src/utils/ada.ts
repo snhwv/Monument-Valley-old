@@ -257,6 +257,7 @@ export default class Ada {
     }
 
     const mutation = { x: 0 };
+    let added = false;
     let nextPlaneCallbackCalled = false;
 
     const tween = new TWEEN.Tween(mutation)
@@ -300,6 +301,7 @@ export default class Ada {
             // onupdate设置完成时的物体与oncomplate的物体角度已经不一样了，所以直接在这儿就把ada加到下一个plane中去
             this.element.lookAt(endPosition);
           } else {
+            added = true;
             this.hasAdaPlane = nextPlane;
             nextPlane.attach(this.element);
             this._move();
@@ -307,7 +309,7 @@ export default class Ada {
         }
       })
       .onComplete(() => {
-        if (nextPlane.userData.type === "stair") {
+        if (!added) {
           this.hasAdaPlane = nextPlane;
           nextPlane.attach(this.element);
           this._move();
