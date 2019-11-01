@@ -26,6 +26,8 @@ var sceneData = {
   background: "#000000",
   "ambient light": ambientLight.color.getHex(),
   "directional light": directionalLight.color.getHex(),
+  "direct intensity": directionalLight.intensity,
+  "ambient intensity": ambientLight.intensity,
   "position x": directionalLight.position.x,
   "position y": directionalLight.position.y,
   "position z": directionalLight.position.z
@@ -38,6 +40,12 @@ folderScene
   .addColor(sceneData, "directional light")
   .onChange(handleColorChange(directionalLight.color));
 
+folderScene.add(sceneData, "direct intensity", 0, 1).onChange((value: number) => {
+  directionalLight.intensity = value;
+});
+folderScene.add(sceneData, "ambient intensity", 0, 1).onChange((value: number) => {
+  ambientLight.intensity = value;
+});
 folderScene.add(sceneData, "position x", 0, 600).onChange((value: number) => {
   directionalLight.position.setX(value);
 });
@@ -84,11 +92,11 @@ function guiSceneFog(folder: any, scene: Scene) {
     .onChange(handleColorChange(fog.color));
 }
 
-const light1 = new PointLight(0xFFCC66, 0.5, 500);
-light1.position.set(100, 600, 100);
+// const light1 = new PointLight(0xFFCC66, 0.5, 500);
+// light1.position.set(100, 600, 100);
 
-var sphere = new SphereBufferGeometry(10, 16, 8);
-light1.add(
-  new Mesh(sphere, new MeshBasicMaterial({ color: 0xff0040 }))
-);
+// var sphere = new SphereBufferGeometry(10, 16, 8);
+// light1.add(
+//   new Mesh(sphere, new MeshBasicMaterial({ color: 0xff0040 }))
+// );
 // scene.add(light1);

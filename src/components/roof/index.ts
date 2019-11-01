@@ -17,7 +17,7 @@ import {
   OctahedronBufferGeometry,
   OctahedronGeometry
 } from "three";
-import { axis, unitLength, mainMaterial } from "@/constents";
+import { axis, unitLength, mainMaterial, secendMaterial } from "@/constents";
 import { subtract, intersect, union } from "@/utils/bsp";
 
 export default class Roof {
@@ -98,7 +98,7 @@ export default class Roof {
       getQuaternionFromAxisAndAngle(axis.y, 0)
     );
     const result = intersect(verticalGeometry, horizontalGeometry);
-    const mesh = new Mesh(result, mainMaterial);
+    const mesh = new Mesh(result, secendMaterial);
     
     this.element.add(mesh);
   }
