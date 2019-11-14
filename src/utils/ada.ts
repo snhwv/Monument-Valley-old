@@ -52,10 +52,12 @@ export default class Ada {
     // geo.rotateZ(-Math.PI / 2)
     let material = new MeshLambertMaterial({
       color: 0x03a9f4,
-      side: DoubleSide
+      side: DoubleSide,
+      depthTest: false
     });
-
+    geo.translate(0, 10, 0);
     const cube = new Mesh(geo, material);
+    cube.name = "adaEl";
     this.element.add(cube);
     this.element.lookAt(axis.z);
   }
@@ -293,7 +295,10 @@ export default class Ada {
         );
 
         this.element.position.copy(currentPosition);
-        if (nextPlane.userData.type !== "stair") {
+        if (
+          nextPlane.userData.type !== "stair" &&
+          !nextPlane.userData.noLookAt
+        ) {
           // 上一个不是楼梯，下一个不是楼梯，设置lookat，（
           // 上一个是楼梯的话不用设置lookat；上一个是平地，下一个是楼梯，上面代码已经设置了）
           if (!this.element.position.equals(endPosition)) {

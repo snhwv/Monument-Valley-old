@@ -190,6 +190,9 @@ export default class CenterRotate {
       plane.userData.belongGroup = 'centerRotateTopPath';
       plane.userData.type = 'normal';
       plane.userData.index = i + 1;
+      // if(i === 2) {
+      //   plane.userData.noLookAt = true;
+      // }
       composeObject(
         plane,
         new Vector3(0, unitLength / 2 + 0.005, 0),

@@ -26,7 +26,8 @@ import {
   Box3,
   DoubleSide,
   TextureLoader,
-  ImageUtils
+  ImageUtils,
+  Geometry
 } from "three";
 import * as THREE from "three";
 import { scene, camera, renderer } from "../base";
@@ -62,6 +63,7 @@ export default class LevelOne {
   valve!: Valve;
   centerRotable!: Rotable;
   stairRotable!: Rotable;
+  partTriangle!: PartTriangle;
   spinControl!: SpinControl;
   ada!: Ada;
   constructor() {
@@ -93,6 +95,8 @@ export default class LevelOne {
     scene.add(enterPointOne);
     scene.add(outPoint);
     scene.add(partTriangle);
+
+    // this.partTriangle.generateCover();
 
     const rotableGroup = new Group();
 
@@ -250,11 +254,11 @@ export default class LevelOne {
         },
         {
           groupName: "partTriangleOne",
-          index: 2
+          index: 3
         },
         {
           groupName: "partTriangleTWo",
-          index: 3
+          index: 2
         },
         {
           groupName: "centerRotateTopPath",
@@ -341,7 +345,7 @@ export default class LevelOne {
                 },
                 {
                   groupName: "partTriangleOne",
-                  index: 2
+                  index: 3
                 }
               ],
               [
@@ -351,7 +355,7 @@ export default class LevelOne {
                 },
                 {
                   groupName: "partTriangleTWo",
-                  index: 3
+                  index: 2
                 }
               ]
             ];
@@ -368,21 +372,78 @@ export default class LevelOne {
     const groupedPlanesObject = window.groupedPlanesObject;
     console.log(groupedPlanesObject);
 
-    (groupedPlanesObject.rotateTrigger[0] as IUserData).callback = function(
+    (groupedPlanesObject.partTriangleOne[2] as IUserData).callback = (
       tween,
       ada
-    ) {
-      if (this.called) {
+    ) => {
+      const ada1 = ada as Ada;
+
+      const adaEl = ada1.element.getObjectByName("adaEl");
+
+      const partTriangleOne2 = groupedPlanesObject
+        .partTriangleOne[2] as IUserData;
+      if (adaEl) {
+        if (partTriangleOne2.called) {
+          return;
+        }
+        // const coverPosition = camera.position.clone().multiplyScalar(0.1);
+        // const adaElMesh = adaEl as Mesh;
+        // const group = new Group();
+        // this.partTriangle.planes.map(plane => {
+        //   const p = new Vector3();
+        //   const q = new Quaternion();
+        //   // debugger;  
+        //   plane.getWorldQuaternion(q);
+        //   q.conjugate();
+        //   coverPosition.applyQuaternion(q);
+        //   const cp = coverPosition.clone();
+        //   console.log(cp)
+
+        //   plane.position.add(cp)
+
+        //   // plane.getWorldPosition(p);
+        //   // group.attach(plane);
+        //   // plane.position.copy(p);
+        //   // group.position.add(coverPosition)
+        //   // console.log(plane);
+        // });
+        // scene.add(group);
+        // adaElMesh.renderOrder = 2;
+        // adaElMesh.onBeforeRender = function(renderer) {
+        //   renderer.clearDepth();
+        // };
+
+        // adaElMesh.updateWorldMatrix(true, false);
+
+        // console.log(adaElMesh);
+        // const groupTwoWorldP = new Vector3();
+
+        // adaElMesh.getWorldPosition(groupTwoWorldP);
+
+        // const p = coverPosition.add(groupTwoWorldP);
+        // adaElMesh.worldToLocal(p);
+        // adaElMesh.translate(p.x, p.y, p.z);
+        partTriangleOne2.called = true;
+      }
+    };
+
+    (groupedPlanesObject.rotateTrigger[0] as IUserData).callback = (
+      tween,
+      ada
+    ) => {
+      const tirgger = groupedPlanesObject.rotateTrigger[0];
+      if (tirgger.called) {
         return;
       }
-      // debugger;
-      groupedPlanesObject.partTriangleOne[0].connectPlane.push(
-        groupedPlanesObject.partTriangleTWo[0]
-      );
-      groupedPlanesObject.partTriangleTWo[0].connectPlane.push(
-        groupedPlanesObject.partTriangleOne[0]
-      );
-      this.called = true;
+      this.partTriangle.rotate(() => {
+        groupedPlanesObject.partTriangleOne[0].connectPlane.push(
+          groupedPlanesObject.partTriangleTWo[0]
+        );
+        groupedPlanesObject.partTriangleTWo[0].connectPlane.push(
+          groupedPlanesObject.partTriangleOne[0]
+        );
+      });
+      tirgger.called = true;
       if (ada) {
         ada.isMoving = false;
         ada.path = [];
@@ -528,7 +589,7 @@ export default class LevelOne {
       plane.connectPlane = [
         ...originGroupedPlanesObject[item.groupName][item.index].connectPlane
       ];
-      plane.plane.material = material;
+      // plane.plane.material = material;
     });
   }
 
@@ -809,6 +870,7 @@ export default class LevelOne {
     const partTriangleGroup = partTriangle.element;
     // putTop(partTriangleGroup, this.centerCube);
 
+    this.partTriangle = partTriangle;
     return partTriangleGroup;
   }
 }

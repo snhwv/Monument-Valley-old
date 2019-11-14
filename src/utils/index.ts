@@ -133,8 +133,8 @@ export function walkPlaneCreator(width: number, height: number) {
   let material = new MeshLambertMaterial({
     color: 0xffff00,
     side: DoubleSide,
-    transparent: true,
-    opacity: 0,
+    // transparent: true,
+    // opacity: 0,
   });
   const plane = new Mesh(planeGeo, material);
   plane.userData.normal = axis.z.clone();
@@ -192,7 +192,7 @@ function mousedown(planes: Mesh[], e: any) {
     if (planes.includes(result[0].object as Mesh)) {
       const plane = result[0].object as Mesh;
       if (!plane.userData.hasAda) {
-        plane.material = material;
+        // plane.material = material;
         const G = new MGraph(window.nodes.length);
         createMGraph(generateMGraph(), G);
         Floyd(G);
@@ -203,7 +203,7 @@ function mousedown(planes: Mesh[], e: any) {
           color: 0xff0000,
           side: DoubleSide
         });
-        (hasAdaPlane as Mesh).material = adaMaterial;
+        // (hasAdaPlane as Mesh).material = adaMaterial;
         const path = getPath(
           planes.indexOf(hasAdaPlane as Mesh),
           planes.indexOf(plane)
